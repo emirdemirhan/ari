@@ -1,0 +1,31 @@
+# --- CMake ve Derleme Çıktıları ---
+build/
+bin/
+out/
+*.elf
+*.bin
+*.hex
+*.map
+*.o
+*.a
+*.d
+*.obj
+*.lst
+
+# --- VS Code Ayarları ---
+# Kendi kişisel ayarlarını repoya atma, sadece ortak ayarları at
+.vscode/*
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+# Eğer c_cpp_properties.json içinde mutlak yollar (/home/emir/...) varsa onu da ignore et:
+.vscode/c_cpp_properties.json
+
+# --- Sistem Dosyaları (Gereksizler) ---
+.DS_Store
+Thumbs.db
+
+# --- libopencm3 ---
+# libopencm3 bir submodule olduğu için klasörün kendisi kalmalı
+# ama içindeki derleme çöplerini istemeyiz (eğer submodule içinde derlediysen)
+libopencm3/lib/libopencm3_stm32*.a
