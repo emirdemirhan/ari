@@ -36,8 +36,11 @@ clocksetup_err_t clock_config(void)
     
 };
     
-    rcc_clock_setup_pll(&rcc_hse_8mhz_to_100mhz);
-    rcc_periph_clock_enable(RCC_GPIOB);
+    rcc_clock_setup_pll(&rcc_hse_8mhz_to_100mhz);  // System clock
+    rcc_periph_clock_enable(RCC_GPIOA);     // NRF pin gpio port
+    rcc_periph_clock_enable(RCC_GPIOB);     // LED blink gpio port
+    rcc_periph_clock_enable(RCC_SPI1);      // SPI communication port
+
 
     return clocksetup_success;
 }
