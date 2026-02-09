@@ -1,6 +1,6 @@
 #ifndef START_H
 #define START_H
-#include "error.h"
+#include "ari_error.h"
 
 
 // Define functions
