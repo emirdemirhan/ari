@@ -18,7 +18,12 @@
   * @return Received byte.
   */
  static inline uint8_t spi_transfer(uint8_t data) {
+
+    /* Send data */
     spi_send(NRF_SPI, data);
+
+
+    /* Read and return receiving data */
     return (uint8_t)spi_read(NRF_SPI);
 }
 
