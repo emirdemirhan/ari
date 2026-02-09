@@ -21,3 +21,15 @@ void blink_task_start(void)
     // Create blink task
     xTaskCreate(task_blink, "LED_Task", 128, NULL, 2, NULL);
 }
+
+/* FreeRTOS task: Communication Task */
+static void task_comm(void *args) {
+    (void)args;
+    
+}
+
+void communication_task_start(void)
+{
+    // Create blink task
+    xTaskCreate(task_comm, "Com_Task", 128, NULL, 2, NULL);
+}
