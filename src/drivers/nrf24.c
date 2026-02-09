@@ -4,6 +4,7 @@
  */
 
  #include "drivers/nrf24.h"
+ #include "drivers/delay.h"
 
  /* --- Private Helper Functions --- */
  
@@ -111,7 +112,7 @@
     ce_disable(); // Idle state Low
      
     /* Wait for chip to stabilize (Power on reset) */
-    for(volatile int i=0; i<10000; i++); 
+    delay_us(10);
  }
  
  void nrf24_config(uint8_t channel, uint8_t payload_size) {
@@ -179,7 +180,7 @@
      ce_enable(); // Start listening
      
      /* 130us startup delay */
-     for(volatile int i=0; i<1000; i++); 
+     delay_us(130);
  }
  
  bool nrf24_data_available(void) {
@@ -206,6 +207,6 @@
      nrf_write_buf(NRF_CMD_W_TX_PAYLOAD, data, len);
      
      ce_enable();
-     for(volatile int i=0; i<100; i++); // Short delay > 10us
+     delay_us(10); // Short delay > 10us
      ce_disable();
  }
