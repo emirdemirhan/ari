@@ -12,7 +12,7 @@ int main(void) {
     err = setup_device();
 
     // Start blink task
-    blink_task_start();
+    communication_task_start();
     
     /* Start RTOS */
     vTaskStartScheduler();
