@@ -10,7 +10,7 @@ void setup_perihperals(void)
     
     /* SPI configuration */
     gpio_mode_setup(SPI_PORT, GPIO_MODE_AF, GPIO_PUPD_NONE, SPI_SCK | SPI_MOSI | SPI_MISO);     // SPI configuration
-    gpio_set_af(GPIOA, GPIO_AF5, GPIO5 | GPIO6 | GPIO7);    // Set alternate function to SPI pins
+    gpio_set_af(GPIOA, GPIO_AF5, SPI_SCK | SPI_MOSI | SPI_MISO);    // Set alternate function to SPI pins
     
     /* NRF CSN CE configuration */
     gpio_mode_setup(SPI_PORT, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, NRF_CSN | NRF_CE);
