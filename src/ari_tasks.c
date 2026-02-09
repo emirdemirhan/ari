@@ -37,6 +37,10 @@ static void task_comm(void *args) {
             /* "Sakin ol şampiyon, her şey yolunda" */
             gpio_toggle(LED_PORT, LED_PIN);
             vTaskDelay(pdMS_TO_TICKS(1000)); 
+
+            /* Belki kablo oynadı, tekrar dene */
+            connection = nrf24_test_connection();
+            
         } else {
             /* BAŞARISIZ: Çok Hızlı Yanıp Sönme (100 ms) */
             /* "İmdat! Kabloları kontrol et!" */
