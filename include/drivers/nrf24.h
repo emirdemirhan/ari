@@ -12,12 +12,7 @@
  #include <libopencm3/stm32/gpio.h>
  #include <libopencm3/stm32/spi.h>
  
- /* --- Hardware Configuration (Adjust for your Board) --- */
- #define NRF_SPI             SPI1
- #define NRF_PORT_CSN        GPIOA       /**< Chip Select Not Port */
- #define NRF_PIN_CSN         GPIO4       /**< Chip Select Not Pin */
- #define NRF_PORT_CE         GPIOA       /**< Chip Enable Port */
- #define NRF_PIN_CE          GPIO3       /**< Chip Enable Pin */
+
  
  /* --- nRF24L01+ Commands --- */
  #define NRF_CMD_R_REGISTER    0x00      /**< Read command */

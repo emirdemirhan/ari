@@ -5,46 +5,8 @@
 
  #include "drivers/nrf24.h"
  #include "drivers/delay.h"
-
- /* --- Private Helper Functions --- */
+ #include "drivers/nrf_wrapper.h"
  
- /**
-  * @brief Selects the slave (CSN Low).
-  */
- static void cs_select(void) {
-     gpio_clear(NRF_PORT_CSN, NRF_PIN_CSN);
- }
- 
- /**
-  * @brief Deselects the slave (CSN High).
-  */
- static void cs_deselect(void) {
-     gpio_set(NRF_PORT_CSN, NRF_PIN_CSN);
- }
- 
- /**
-  * @brief Enables the chip (CE High).
-  */
- static void ce_enable(void) {
-     gpio_set(NRF_PORT_CE, NRF_PIN_CE);
- }
- 
- /**
-  * @brief Disables the chip (CE Low).
-  */
- static void ce_disable(void) {
-     gpio_clear(NRF_PORT_CE, NRF_PIN_CE);
- }
- 
- /**
-  * @brief Sends/Receives one byte via SPI.
-  * @param data Byte to send.
-  * @return Received byte.
-  */
- static uint8_t spi_transfer(uint8_t data) {
-     spi_send(NRF_SPI, data);
-     return (uint8_t)spi_read(NRF_SPI);
- }
  
  /**
   * @brief Writes a value to a register.
