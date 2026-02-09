@@ -1,6 +1,7 @@
 #include <libopencm3/stm32/gpio.h>
 #include <libopencm3/stm32/spi.h>
 #include "peripherals.h"
+#include "drivers/delay.h"
 
 void setup_perihperals(void)
 {
@@ -23,5 +24,6 @@ void setup_perihperals(void)
         SPI_CR1_MSBFIRST);               // Big endian
 
     spi_enable(NRF_SPI);
+    delay_init();
 
 }
