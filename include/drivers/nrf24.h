@@ -11,6 +11,7 @@
  #include <stdbool.h>
  #include <libopencm3/stm32/gpio.h>
  #include <libopencm3/stm32/spi.h>
+ #include "ari_error.h"
  
 
  
@@ -100,5 +101,14 @@
   * @param len Number of bytes to send.
   */
  void nrf24_write(uint8_t *data, uint8_t len);
+
+ /**
+ * @brief Verifies the hardware connection (SPI Ping Test).
+ * * Writes a specific value to a read/write register (RF_CH) and reads it back.
+ * If the read value matches the written value, it confirms that SPI wiring is correct.
+ * * @return nrfsetup_success  SPI connection is OK.
+ * @return nrfsetup_fail Connection failed (Check wiring or power).
+ */
+nrf_err_t nrf24_test_connection(void);
  
  #endif /* NRF24_H */
