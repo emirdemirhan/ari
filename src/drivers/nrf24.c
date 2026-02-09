@@ -172,3 +172,20 @@
      delay_us(10); // Short delay > 10us
      ce_disable();
  }
+
+ nrf_err_t nrf24_test_connection(void) {
+    uint8_t test_val = 0x35; // Hex 0x35 = Decimal 53 (random number)
+    
+    /* 1. Write it to register */
+    nrf_write_reg(NRF_REG_RF_CH, test_val);
+    
+    /* 2. Read it back */
+    uint8_t read_val = nrf_read_reg(NRF_REG_RF_CH);
+    
+    /* 3. Compare */
+    if (read_val == test_val) {
+        return nrfsetup_success; // Success
+    }
+    
+    return nrfsetup_fail; // Fail
+}
