@@ -3,6 +3,7 @@ BUILD_DIR = build
 
 # 1. Kaynak Dosyalar (Main + FreeRTOS)
 SRCS = $(wildcard src/*.c)
+SRCS += $(wildcard src/drivers/*.c)
 SRCS += freertos/tasks.c
 SRCS += freertos/list.c
 SRCS += freertos/queue.c
@@ -19,6 +20,7 @@ ARCH_FLAGS = -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
 # 4. Include Yolları
 INCLUDES = -Iinclude
+INCLUDES += -Iinclude/drivers
 INCLUDES += -Iconfig
 INCLUDES += -Ifreertos/include
 INCLUDES += -Ifreertos/ARM_CM4F
