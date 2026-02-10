@@ -39,4 +39,16 @@ typedef enum
 
 
 
+/* communication error type 
+* @param comm_success: device setup successfully
+* @param comm_fail: device setup has failed
+*/
+typedef enum
+{
+    comm_success = 0,
+    comm_fail = 1,
+
+}comm_err_t;
+
+
 #endif
