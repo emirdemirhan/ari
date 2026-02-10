@@ -47,6 +47,8 @@ typedef enum
 {
     comm_success = 0,
     comm_fail = 1,
+    comm_datanotready = 2,
+    comm_not_init = 3,
 
 }comm_err_t;
 
