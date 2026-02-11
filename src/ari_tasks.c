@@ -65,6 +65,9 @@ static void task_control(void *args) {
 
     // Get_current_state();  <-- bu tarz bişey gelcek state estimation
     // Sonra reference ile aradaki farka PID uygulaması yapıcaz
+    // Ama cascade PID lazım robustness arıyoruz
+    // Konum kontrolü yapmaya çalışıyoruz hız ile cascade yapıcaz o yüzden önce iç döngü yani hız
+    // Şimdi roll pitch birlikte olması lazım ama önce kalman kısmını yazalım sonra bu döngüyü kuralım
     
 
 
