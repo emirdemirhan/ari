@@ -24,7 +24,6 @@ typedef struct __attribute__((packed))
 comm_err_t cmd_init(void);
 comm_err_t get_cmd(cmd* data);
 comm_err_t gnp_controlcmd(void);
-static inline comm_err_t parse_cmd(uint8_t* payload);
 
 
 
