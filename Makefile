@@ -4,6 +4,8 @@ BUILD_DIR = build
 # 1. Kaynak Dosyalar (Main + FreeRTOS)
 SRCS = $(wildcard src/*.c)
 SRCS += $(wildcard src/drivers/*.c)
+SRCS += $(wildcard src/flightcontrol/*.c)
+SRCS += $(wildcard src/communication/*.c)
 SRCS += freertos/tasks.c
 SRCS += freertos/list.c
 SRCS += freertos/queue.c
@@ -16,11 +18,14 @@ DEVICE = stm32f412ret6
 OPENCM3_DIR = libopencm3
 
 # 3. FPU AYARLARI (Hard Float - Değiştirme!)
-ARCH_FLAGS = -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
+ARCH_FLAGS = -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16 -O3
 
 # 4. Include Yolları
 INCLUDES = -Iinclude
 INCLUDES += -Iinclude/drivers
+INCLUDES += -Iinclude/flightcontrol
+INCLUDES += -Iinclude/ari_math
+INCLUDES += -Iinclude/communication
 INCLUDES += -Iconfig
 INCLUDES += -Ifreertos/include
 INCLUDES += -Ifreertos/ARM_CM4F
