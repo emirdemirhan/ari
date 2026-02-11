@@ -1,9 +1,9 @@
 #include "flightcontrol/pid.h"
 
-static inline float calculate_pid(pid_coeffs* pid, float r, float y)
+static inline float calculate_pid(pid_coeffs* pid, float r, float y, float ts)
 {
     /* PID Control Algorithm
-    - u[k] = Kp.e + Kd . (e - e_prev) + Ki . (e + e_sum)  
+    - u[k] = Kp.e + Kd . (e - e_prev)/dt + Ki . (e + e_sum)  
     */
 
     float u = 0;
@@ -12,7 +12,7 @@ static inline float calculate_pid(pid_coeffs* pid, float r, float y)
 
     float e = r - y;
 
-    u = pid->Kp * e + pid->Kd * (e - e_prev) + pid->Ki + (e + e_sum);
+    u = pid->Kp * e + pid->Kd * (e - e_prev)*(1/ts) + pid->Ki + (e + e_sum)*ts;
 
     e_prev = e;
     e_sum += e; 

@@ -4,6 +4,7 @@
 #include <stdint.h>
 
 #define MAX_U  100  // Actuator saturation
+#define MAX_I  50   // Integral saturation
 
 
 typedef struct pid
@@ -15,7 +16,8 @@ typedef struct pid
 }pid_coeffs;
 
 
-static inline float calculate_pid(pid_coeffs* pid, float r, float y);
+/* Calculate PID according to the classical PID formula */
+static inline float calculate_pid(pid_coeffs* pid, float r, float y, float ts);
 
 
 #endif
