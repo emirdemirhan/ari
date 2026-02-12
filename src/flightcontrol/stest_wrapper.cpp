@@ -1,5 +1,6 @@
 #include "flightcontrol/state_estimation.h"
 #include "flightcontrol/stest_wrapper.h"
+#include <cmath>
 
 Kalman filter(Ts);
 
@@ -18,9 +19,15 @@ void kalman_predict(float wx, float wy, float wz)
 
 
 /* Takes accelerometer measurements to update prediction */
-void kalman_update(float ax, float ay)
+void kalman_update(float ax, float ay, float az)
 {
-    ari_matrix<2,1> acc = {ax, ay};
+    // Roll calculation
+    float phi_acc = std::atan2(ay, az);
+
+    // Pitch calculation
+    float theta_acc = std::atan2(-ax, std::sqrt(ay*ay + az*az));
+
+    ari_matrix<2,1> acc = {phi_acc, theta_acc};
 
     filter.update(acc);
 

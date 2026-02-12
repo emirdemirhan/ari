@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-/* Takes gyro measurements and runs kalman algorithm to predict the state*/
+/* Takes gyro measurements and runs kalman algorithm to predict the state */
 void kalman_predict(float wx, float wy, float wz);
 
 
