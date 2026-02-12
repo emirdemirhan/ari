@@ -1,7 +1,6 @@
 #ifndef STEST_WRAPPER_H
 #define STEST_WRAPPER_H
 
-#include "state_estimation.h"
 
 #define Ts  0.01    // Define sampling time (dt)
 
@@ -15,7 +14,7 @@ void kalman_predict(float wx, float wy, float wz);
 
 
 /* Takes accelerometer measurements to update prediction */
-void kalman_update(float ax, float ay);
+void kalman_update(float ax, float ay, float az);
 
 
 void kalman_getangles(float* roll, float* pitch, float* yaw);
