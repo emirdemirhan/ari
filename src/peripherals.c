@@ -24,6 +24,32 @@ void setup_perihperals(void)
         SPI_CR1_MSBFIRST);               // Big endian
 
     spi_enable(NRF_SPI);
+
+    gpio_mode_setup(GPIOB, GPIO_MODE_OUTPUT, GPIO_PUPD_NONE, GPIO12);
+    gpio_set(GPIOB, GPIO12); // CS High (Pasif)
+
+    // 3. SPI Pin Ayarları (SCK=PB13, MISO=PB14, MOSI=PB15)
+    // Bu pinler de AF5 (Alternate Function 5) modunda çalışır.
+    gpio_mode_setup(GPIOB, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO13 | GPIO14 | GPIO15);
+    gpio_set_af(GPIOB, GPIO_AF5, GPIO13 | GPIO14 | GPIO15);
+    gpio_set_output_options(GPIOB, GPIO_OTYPE_PP, GPIO_OSPEED_50MHZ, GPIO13 | GPIO15);
+
+
+    // 4. SPI2 Ayarları (Master Mode)
+    // Dikkat: SPI2'nin base clock hızı (APB1) SPI1'den (APB2) farklı olabilir.
+    // F412'de APB1 genelde 50MHz, APB2 100MHz'dir.
+    // DIV_8 veya DIV_16 güvenlidir (3-6 MHz civarı).
+    spi_init_master(SPI2, SPI_CR1_BAUDRATE_FPCLK_DIV_8, 
+                    SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE, 
+                    SPI_CR1_CPHA_CLK_TRANSITION_1,
+                    SPI_CR1_DFF_8BIT,
+                    SPI_CR1_MSBFIRST);
+    
+
+    // SPI Modülünü Aktif Et
+    spi_enable(SPI2);
+
+    /* DWT delay init */
     delay_init();
 
 }

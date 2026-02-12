@@ -39,7 +39,8 @@ clocksetup_err_t clock_config(void)
     rcc_clock_setup_pll(&rcc_hse_8mhz_to_100mhz);  // System clock
     rcc_periph_clock_enable(RCC_GPIOA);     // NRF pin gpio port
     rcc_periph_clock_enable(RCC_GPIOB);     // LED blink gpio port
-    rcc_periph_clock_enable(RCC_SPI1);      // SPI communication port
+    rcc_periph_clock_enable(RCC_SPI1);      // SPI communication port for NRF
+    rcc_periph_clock_enable(RCC_SPI2);      // SPI communication port for BMI160
 
 
     return clocksetup_success;

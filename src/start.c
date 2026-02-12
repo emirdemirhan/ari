@@ -3,6 +3,7 @@
 #include "clock_config.h"
 #include "peripherals.h"
 #include "drivers/nrf24.h"
+#include "drivers/bmi160.h"
 
 devicesetup_err_t setup_device(void)
 {
@@ -21,6 +22,16 @@ devicesetup_err_t setup_device(void)
 
     /* Setup NRF24 for communication */
     nrf24_init();
+
+    BMI160_Config sensor_conf = {
+        .acc_range = BMI160_ACCEL_RANGE_16G, // Drone titrer, yüksek range iyidir
+        .gyr_range = BMI160_GYRO_RANGE_2000, // Hızlı dönüşler için 2000dps
+        .acc_odr   = BMI160_ODR_200HZ,       // 800Hz Output Data Rate
+        .gyr_odr   = BMI160_ODR_200HZ        // Donanımsal Filtre (DLPF) burada aktif
+    };
+
+    /* BMI160 init */
+    bmi160_init(&sensor_conf);
     
 
     return devicesetup_success;
