@@ -107,7 +107,8 @@ public:
     }
 
     /* Matrix Transpose */ 
-    Matrix<Cols, Rows> transpose() const {
+    Matrix<Cols, Rows> transpose() const 
+    {
         Matrix<Cols, Rows> result;
         for (int i = 0; i < Rows; i++) {
             for (int j = 0; j < Cols; j++) {
@@ -117,9 +118,17 @@ public:
         return result;
     }
 
+    void setIdentity() {
+        memset(data, 0, sizeof(data));
+        for (int i = 0; i < (Rows < Cols ? Rows : Cols); i++) {
+            (*this)(i, i) = 1.0f;
+        }
+    }
+
 
     /* Matrix inverse */
-    bool inverse(ari_matrix<Rows, Cols>& inv) const {
+    bool inverse(ari_matrix<Rows, Cols>& inv) const
+    {
         static_assert(Rows == Cols, "Non-square matrix, can't take inverse !");
         
         ari_matrix<Rows, Cols * 2> temp; // Augmented Matrix [A | I]
@@ -160,6 +169,9 @@ public:
         }
         return true;
     }
+
+
+
 };
 
 using ari_Vector3f = ari_matrix<3, 1>;
