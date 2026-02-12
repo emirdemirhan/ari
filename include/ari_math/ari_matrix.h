@@ -4,9 +4,10 @@
 #include <math.h>
 #include <stdint.h>
 #include <string.h>
+#include <initializer_list>
 
 
-template <uint8_t Rows, uint8_t Cols>
+template <int Rows, int Cols>
 class ari_matrix
 {
 public:
@@ -33,7 +34,7 @@ public:
 
     /* Operator Overloadings */
 
-    inline float& operator()(uint8_t r, uint8_t c)
+    inline float& operator()(int r, int c)
     {
         return data[r * Cols + c];  // Rows are stacked in a horizontal line
     }
@@ -50,9 +51,9 @@ public:
     ari_matrix<Rows,Cols> operator+(const ari_matrix<Rows, Cols>& other) const
     {
         ari_matrix<Rows, Cols> result;
-        for (uint8_t i = 0; i < Rows*Cols; i++)
+        for (int i = 0; i < Rows*Cols; i++)
         {
-            result.data[i] = this.data[i] + other.data[i];
+            result.data[i] = this->data[i] + other.data[i];
         }
         
         return result;
@@ -62,9 +63,9 @@ public:
     ari_matrix<Rows,Cols> operator-(const ari_matrix<Rows, Cols>& other) const
     {
         ari_matrix<Rows, Cols> result;
-        for (uint8_t i = 0; i < Rows*Cols; i++)
+        for (int i = 0; i < Rows*Cols; i++)
         {
-            result.data[i] = this.data[i] - other.data[i];
+            result.data[i] = this->data[i] - other.data[i];
         }
         
         return result;
@@ -79,12 +80,12 @@ public:
         /* Compiler optimization -O3 flag fully unrolling the loops, so no need to worry about complexity */
 
         ari_matrix<Rows,Newcols> result;
-        for (uint8_t i = 0; i < Rows; i++)
+        for (int i = 0; i < Rows; i++)
         {
-            for (uint8_t j = 0; j < Newcols; j++)
+            for (int j = 0; j < Newcols; j++)
             {
                 float sum = 0.0f;
-                for (uint8_t k = 0 k < Cols k++)
+                for (int k = 0; k < Cols; k++)
                 {
                     sum += (*this)(i,k) * other(k,j); 
                     
@@ -92,24 +93,26 @@ public:
                 result(i,j) = sum;
             }
         }
+
+        return result;
     }
 
     /* Matrix Multiplication with scalars */
     ari_matrix<Rows,Cols> operator*(float scalar) const
     {
         ari_matrix<Rows, Cols> result;
-        for (uint8_t i = 0; i < Rows*Cols; i++)
+        for (int i = 0; i < Rows*Cols; i++)
         {
-            result.data[i] = this.data[i] * scalar;
+            result.data[i] = this->data[i] * scalar;
         }
         
         return result;
     }
 
     /* Matrix Transpose */ 
-    Matrix<Cols, Rows> transpose() const 
+    ari_matrix<Cols, Rows> transpose() const 
     {
-        Matrix<Cols, Rows> result;
+        ari_matrix<Cols, Rows> result;
         for (int i = 0; i < Rows; i++) {
             for (int j = 0; j < Cols; j++) {
                 result(j, i) = (*this)(i, j);
