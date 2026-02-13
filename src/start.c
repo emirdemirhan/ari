@@ -7,7 +7,7 @@
 
 devicesetup_err_t setup_device(void)
 {
-    uint8_t err;
+    volatile uint8_t err;
 
     /* Configure clocks */
     err = clock_config();
@@ -31,7 +31,7 @@ devicesetup_err_t setup_device(void)
     };
 
     /* BMI160 init */
-    bmi160_init(&sensor_conf);
+    err = bmi160_init(&sensor_conf);
     
 
     return devicesetup_success;
