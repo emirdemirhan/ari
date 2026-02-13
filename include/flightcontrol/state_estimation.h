@@ -7,24 +7,11 @@ class Kalman
 {
 private:
 
-    /* System matrix A is considered as 
-        \theta_(k+1) = \theta_k + (w_theta - bias_theta) * dt   */
-        ari_Matrix6f A = {
-            1.0f, 0.0f, 0.0f, -_dt, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f, -_dt, 0.0f,
-            0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -_dt,
-            0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
-        };
+    /* Sytem matrix A (6,6) */
+    ari_Matrix6f A;
 
     /* Control input matrix (6,3) which is compatible with measurement (3,1) */
-    ari_matrix<6,3> B = { _dt,0.0f,0,
-                        0,_dt,0,
-                        0,0,_dt,
-                        0,0,0,
-                        0,0,0,
-                        0,0,0};
+    ari_matrix<6,3> B;
 
     /* State matrix (6,1)*/
     ari_Vector6f x; 
@@ -60,6 +47,24 @@ public:
 
     Kalman(float dt) : _dt(dt)
     { 
+            /* System matrix A is considered as 
+        \theta_(k+1) = \theta_k + (w_theta - bias_theta) * dt   */
+        A = {
+            1.0f, 0.0f, 0.0f, -_dt, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f, -_dt, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -_dt,
+            0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+        };
+
+    /* Control input matrix (6,3) which is compatible with measurement (3,1) */
+        B = { _dt,0.0f,0,
+                        0,_dt,0,
+                        0,0,_dt,
+                        0,0,0,
+                        0,0,0,
+                        0,0,0};
         /* Set P matrix */
         P.setIdentity();
         P = P * 0.1f;
