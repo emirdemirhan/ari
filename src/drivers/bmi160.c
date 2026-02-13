@@ -21,19 +21,27 @@
 volatile uint8_t id;
 
 bool bmi160_init(const BMI160_Config *config) {
+
+    bmi160_delay_us(10000); // Wait 10ms for power-up
+
+    /* Read one byte to enable spi mode (CS low - high) */
+    bmi160_ll_read(REG_CHIP_ID);
+
     // 1. Soft Reset
     bmi160_ll_write(REG_CMD, CMD_SOFT_RESET);
-    bmi160_delay_us(15000); // Wait 15ms for boot-up
+    bmi160_delay_us(30000); // Wait 30ms for boot-up
 
-    while(1){
+    /* Read one byte to enable spi mode (CS low - high) */
+    bmi160_ll_read(REG_CHIP_ID);
+    bmi160_delay_us(10000);
+    
     // 2. Check Chip ID
     id = bmi160_ll_read(REG_CHIP_ID);
-    if (id != 0xD1) {
-        //return false; // ID Mismatch or connection error
-        continue;
+    if (id != 0xD1) {     
+        return false; // ID Mismatch or connection error
+    
     }   
-}
-
+    
     // 3. Wake up Sensors (Bring to Normal Power Mode)
     bmi160_ll_write(REG_CMD, CMD_ACC_NORMAL);
     bmi160_delay_us(4000); // Wait for Accel wakeup (~3.8ms)
