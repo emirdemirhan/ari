@@ -10,9 +10,10 @@ int main(void) {
 
     // Setup device
     err = setup_device();
+ 
 
     // Start blink task
-    communication_task_start();
+    control_task_start();
     
     /* Start RTOS */
     vTaskStartScheduler();
