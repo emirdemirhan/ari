@@ -39,7 +39,7 @@ void setup_perihperals(void)
     // Dikkat: SPI2'nin base clock hızı (APB1) SPI1'den (APB2) farklı olabilir.
     // F412'de APB1 genelde 50MHz, APB2 100MHz'dir.
     // DIV_8 veya DIV_16 güvenlidir (3-6 MHz civarı).
-    spi_init_master(SPI2, SPI_CR1_BAUDRATE_FPCLK_DIV_8, 
+    spi_init_master(SPI2, SPI_CR1_BAUDRATE_FPCLK_DIV_256, 
                     SPI_CR1_CPOL_CLK_TO_0_WHEN_IDLE, 
                     SPI_CR1_CPHA_CLK_TRANSITION_1,
                     SPI_CR1_DFF_8BIT,
