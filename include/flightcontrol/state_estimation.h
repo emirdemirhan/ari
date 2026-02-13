@@ -111,12 +111,16 @@ public:
 
     void update(ari_matrix<2,1> z)
     {
+         /* Update innovation matrix S = HPH' + R */
+         S = H * P * H.transpose() + R;
+
+        /* Update Kalman gain matrix K = PH'(HPH'+R)⁻¹ */
+        K = P * H.transpose() * S.inverse(S);
+
         /* Update the state according to the measurements */
         x = x + K * (z - H * x);
 
-        /* Update innovation matrix S = HPH' + R */
-        S = H * P * H.transpose() + R;
-
+       
         /* Update previous state as current state */
         x_prev = x;
 
