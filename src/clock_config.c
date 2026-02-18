@@ -11,10 +11,10 @@ clocksetup_err_t clock_config(void)
     static const struct rcc_clock_scale rcc_hse_8mhz_to_100mhz = {
    
     .pllm = 8,    // 8 MHz / 8 = 1 MHz 
-    .plln = 200,  // 1 MHz * 200 = 200 MHz (VCO)
+    .plln = 192,  // 1 MHz * 200 = 200 MHz (VCO)
     .pllp = 2,    // 200 MHz / 2 = 100 MHz (Sysclk)
     
-    .pllq = 2,    // USB
+    .pllq = 4,    // USB
     .pllr = 2,    // I2S
     
     .pll_source = RCC_CFGR_PLLSRC_HSE_CLK, // HSE as pll source
@@ -41,6 +41,10 @@ clocksetup_err_t clock_config(void)
     rcc_periph_clock_enable(RCC_GPIOB);     // LED blink gpio port
     rcc_periph_clock_enable(RCC_SPI1);      // SPI communication port for NRF
     rcc_periph_clock_enable(RCC_SPI2);      // SPI communication port for BMI160
+
+    /* USART1 FOR SIMULATION */
+    rcc_periph_clock_enable(RCC_USART1);
+
 
 
     return clocksetup_success;
