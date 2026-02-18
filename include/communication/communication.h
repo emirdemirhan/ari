@@ -21,8 +21,13 @@ typedef struct __attribute__((packed))
 }cmd;
 
 
+/* Init communication queue */
 comm_err_t cmd_init(void);
+
+/* Get command and write it into data variable */
 comm_err_t get_cmd(cmd* data);
+
+/* Get and parse command, writes to queue */
 comm_err_t gnp_controlcmd(void);
 
 
