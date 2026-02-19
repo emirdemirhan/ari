@@ -42,10 +42,5 @@ clocksetup_err_t clock_config(void)
     rcc_periph_clock_enable(RCC_SPI1);      // SPI communication port for NRF
     rcc_periph_clock_enable(RCC_SPI2);      // SPI communication port for BMI160
 
-    /* USART1 FOR SIMULATION */
-    rcc_periph_clock_enable(RCC_USART1);
-
-
-
     return clocksetup_success;
 }
