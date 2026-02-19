@@ -2,9 +2,7 @@
 
 static inline float calculate_pid(pid_coeffs* pid, float r, float y, float ts)
 {
-    /* PID Control Algorithm
-    - u[k] = Kp.e + Kd . (e - e_prev)/dt + Ki . (e + e_sum)  
-    */
+    
 
     float u = 0;
     float e_prev = 0;

@@ -16,7 +16,9 @@ typedef struct pid
 }pid_coeffs;
 
 
-/* Calculate PID according to the classical PID formula */
+/* Calculate PID according to the classical PID formula:
+    - u[k] = Kp.e + Kd . (e - e_prev)/dt + Ki . (e + e_sum)
+    returns u  */
 static inline float calculate_pid(pid_coeffs* pid, float r, float y, float ts);
 
 
