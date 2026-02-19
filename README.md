@@ -8,3 +8,5 @@ Source code of nano UAV project ARI
 - cascade pid eklenecek 
 - ESKF eklenecek
 - SPI2 clock speed azaltıldı arttırılacak !!
+- Sensörlerle haberleşme için DMA kurulacak !!
+- Simülasyon kodları çıkarılacak
