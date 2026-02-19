@@ -53,22 +53,4 @@ void setup_perihperals(void)
     /* DWT delay init */
     delay_init();
 
-    /* USART ENABLE FOR SIMULATION MODE ONLY !!!!!!!!!!!! */
-    /* 2. Pinleri Alternate Function (AF) moduna al */
-    gpio_mode_setup(GPIOA, GPIO_MODE_AF, GPIO_PUPD_NONE, GPIO9 | GPIO10);
-    
-    /* 3. PA9 ve PA10'u AF7 (USART1) olarak ayarla */
-    gpio_set_af(GPIOA, GPIO_AF7, GPIO9 | GPIO10);
-
-    /* 4. USART Ayarları (115200 Baud, 8 Data Bit, No Parity, 1 Stop Bit) */
-    usart_set_baudrate(USART1, 115200);
-    usart_set_databits(USART1, 8);
-    usart_set_stopbits(USART1, USART_STOPBITS_1);
-    usart_set_mode(USART1, USART_MODE_TX_RX);
-    usart_set_parity(USART1, USART_PARITY_NONE);
-    usart_set_flow_control(USART1, USART_FLOWCONTROL_NONE);
-
-    /* 5. USART'ı Başlat */
-    usart_enable(USART1);
-
 }
