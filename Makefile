@@ -10,6 +10,7 @@ C_SOURCES = $(wildcard src/*.c)
 C_SOURCES += $(wildcard src/drivers/*.c)
 C_SOURCES += $(wildcard src/flightcontrol/*.c)
 C_SOURCES += $(wildcard src/communication/*.c)
+C_SOURCES += $(wildcard src/simulation/*.c)
 C_SOURCES += freertos/tasks.c
 C_SOURCES += freertos/list.c
 C_SOURCES += freertos/queue.c
@@ -41,7 +42,7 @@ SZ = arm-none-eabi-size
 
 # Ortak Ayarlar (İşlemci, FPU, Debug)
 ARCH_FLAGS = -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
-COMMON_FLAGS = $(ARCH_FLAGS) -O3 -g -Wall -Wextra -fno-common -DSTM32F4
+COMMON_FLAGS = $(ARCH_FLAGS) -Og -g -Wall -Wextra -fno-common -DSTM32F4
 
 # Include Yolları
 INCLUDES = -Iinclude \
@@ -49,10 +50,13 @@ INCLUDES = -Iinclude \
            -Iinclude/flightcontrol \
            -Iinclude/ari_math \
            -Iinclude/communication \
+		   -Iinclude/simulation \
            -Iconfig \
            -Ifreertos/include \
            -Ifreertos/ARM_CM4F \
            -I$(OPENCM3_DIR)/include
+
+
 
 # C Bayrakları (Sadece .c dosyaları için)
 CFLAGS = $(COMMON_FLAGS) -std=c99 $(INCLUDES)
