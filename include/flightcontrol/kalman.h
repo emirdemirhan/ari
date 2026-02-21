@@ -4,6 +4,7 @@
 #include "ari_math/ari_matrix.h"
 
 
+
 template <int StateDim, int InputDim, int MeasDim>
 class Kalman
 {
@@ -69,7 +70,9 @@ public:
         R = cov_R;
         P = init_P;
 
-            
+        // Initialize state vector to zero
+        x.setZero(); 
+        
         // Setup the Identity matrix
         I.setIdentity(); 
     }
