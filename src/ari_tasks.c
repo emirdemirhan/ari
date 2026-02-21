@@ -8,6 +8,8 @@
 #include "communication/communication.h"
 #include "drivers/bmi160.h"
 #include "flightcontrol/stest_wrapper.h"
+#include "simulation/hil_bridge.h"
+#include "flightcontrol/pid.h"
 
 
 
@@ -56,10 +58,6 @@ static void task_comm(void *args) {
     
 }
 
-volatile BMI160_RawData raw_data;
-volatile float gyro_si[3];  // rad/s cinsinden
-volatile float accel_si[3]; // m/s^2 cinsinden
-volatile float roll, pitch, yaw;
 
 /* FreeRTOS task: Control Task */
 static void task_control(void *args) {
@@ -75,33 +73,38 @@ static void task_control(void *args) {
     // Konum kontrolü yapmaya çalışıyoruz hız ile cascade yapıcaz o yüzden önce iç döngü yani hız
     // Şimdi roll pitch birlikte olması lazım ama önce kalman kısmını yazalım sonra bu döngüyü kuralım
     
-    // Kalman filtresini deneyelim. Şimdilik direk bmi160tan çekelim verileri.
-
+    // Kalman filtresini deneyelim. Simülasyondan veri çekip uyguluyoruz.
 
     
     while (1) 
     {
-        // --- ADIM A: Veriyi Oku ---
-        // Tek komutla Gyro + Accel çekiyoruz (Burst Read)
-        bmi160_read_all(&raw_data);
 
-        // --- ADIM B: Birim Dönüştürme ---
-        // Ham veriyi (int16) -> Gerçek dünyaya (float) çevir
-        bmi160_convert_to_si(&raw_data, gyro_si, accel_si);
+
+        char sim_data[16];
+
+        usart_receive(sim_data);
+        
+        float roll, pitch, yaw;
 
         // --- ADIM C: Filtreye Gönder ---
         // Gyro verisiyle TAHMİN (Predict) yap (1kHz döngüde burası çalışmalı)
-        kalman_predict(gyro_si[0], gyro_si[1], gyro_si[2]); // dt = 0.001s (1kHz varsayım)
+        kalman_predict(sim_data[0], sim_data[1], sim_data[2]); // dt = 0.001s (1kHz varsayım)
 
         // İvmeölçer verisiyle DÜZELTME (Update) yap
-        kalman_update(accel_si[0], accel_si[1], accel_si[2]);
+        kalman_update(sim_data[3], sim_data[4], sim_data[5]);
         
         // --- ADIM D: Açıyı Al ---
         
         kalman_getangles(&roll, &pitch, &yaw);
 
-        // (Opsiyonel) FreeRTOS kullanıyorsan:
-        vTaskDelay(pdMS_TO_TICKS(100));
+        /* İlk adım olarak yükseklik kontrolü deneyeceğiz */ 
+
+        // Kontrol işareti üretimi
+        pid_coeffs K_angle, K_angle_rate;
+
+        calculate_pid(&K_angle, sim_data[6], sim_data[7], Ts);
+
+
 
         
     }
@@ -129,4 +132,5 @@ void blink_task_start(void)
     // Create blink task
     xTaskCreate(task_blink, "LED_Task", 128, NULL, 2, NULL);
 }
+
 
