@@ -1,7 +1,8 @@
-#ifndef STATE_ESTIMATION_H
-#define STATE_ESTIMATION_H
+#ifndef KALMAN_H
+#define KALMAN_H
 
 #include "ari_math/ari_matrix.h"
+
 
 class Kalman
 {
@@ -13,7 +14,7 @@ private:
     /* Control input matrix (6,3) which is compatible with measurement (3,1) */
     ari_matrix<6,3> B;
 
-    /* State matrix (6,1)*/
+    /* State matrix (6,1): Describes the current state of the system as of euler angles, biases*/
     ari_Vector6f x; 
 
     /* Error covariance matrix (6,6) */
@@ -27,9 +28,6 @@ private:
 
     /* Identity matrix (6,6) */
     ari_Matrix6f I;
-
-    /* Previous state (6,1) */
-    ari_Vector6f x_prev;
 
     /* Kalman gain (6,2) */
     ari_matrix<6,2> K;
@@ -89,11 +87,9 @@ public:
         /* Set Identity matrix */
         I.setIdentity();
 
-        /* Initialize innovation covariance matrix S = HPH' + R */
-        S = H * P * H.transpose() + R;
+        /* Set observation matrix */
 
-        /* Initialize Kalman gain matrix K = PH'(HPH'+R)⁻¹ */
-        K = P * H.transpose() * S.inverse(S);
+        
 
 
 
@@ -102,7 +98,7 @@ public:
     void predict(ari_Vector3f u)
     {
         // Predict the current state
-        x = A * x_prev + B * u;
+        x = A * x + B * u;
 
         // Predict error covariance
         P = A * P * A.transpose() + Q;
@@ -111,8 +107,8 @@ public:
 
     void update(ari_matrix<2,1> z)
     {
-         /* Update innovation matrix S = HPH' + R */
-         S = H * P * H.transpose() + R;
+        /* Update innovation matrix S = HPH' + R */
+        S = H * P * H.transpose() + R;
 
         /* Update Kalman gain matrix K = PH'(HPH'+R)⁻¹ */
         K = P * H.transpose() * S.inverse(S);
@@ -120,16 +116,15 @@ public:
         /* Update the state according to the measurements */
         x = x + K * (z - H * x);
 
-       
-        /* Update previous state as current state */
-        x_prev = x;
+        /* Update covariance matrix */
+        P = (I - K * H) * P;
 
     }
 
     /* Helper functions to get euler angles */
-    float getRoll(void){return x(1,0);}
+    float getRoll(void){return x(0,0);}
     float getPitch(void){return x(1,0);}
-    float getYaw(void){return x(1,0);}
+    float getYaw(void){return x(2,0);}
 
     
 };
