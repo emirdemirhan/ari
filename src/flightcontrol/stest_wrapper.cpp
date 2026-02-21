@@ -1,8 +1,9 @@
-#include "flightcontrol/state_estimation.h"
+#include "flightcontrol/kalman.h"
 #include "flightcontrol/stest_wrapper.h"
 #include <cmath>
 
-Kalman filter(Ts);
+Kalman filter_angles(Ts);
+Kalman filter_altitude(Ts);
 
 #ifdef __cplusplus
 extern "C" {
@@ -13,7 +14,7 @@ void kalman_predict(float wx, float wy, float wz)
 {
     ari_Vector3f gyro = {wx, wy, wz};
 
-    filter.predict(gyro);
+    filter_angles.predict(gyro);
 
 }
 
@@ -29,15 +30,15 @@ void kalman_update(float ax, float ay, float az)
 
     ari_matrix<2,1> acc = {phi_acc, theta_acc};
 
-    filter.update(acc);
+    filter_angles.update(acc);
 
 }
 
 void kalman_getangles(float* roll, float* pitch, float* yaw)
 {
-    *roll = filter.getRoll();
-    *pitch = filter.getPitch();
-    *yaw = filter.getYaw();
+    *roll = filter_angles.getRoll();
+    *pitch = filter_angles.getPitch();
+    *yaw = filter_angles.getYaw();
 }
 
 
