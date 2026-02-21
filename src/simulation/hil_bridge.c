@@ -6,13 +6,13 @@
 
 
 /* --- YARDIMCI GÖNDERME FONKSİYONU --- */
-void usart_send(const char *str) {
+void hil_send(const char *str) {
     while (*str) {
         usart_send_blocking(USART1, *str++);
     }
 }
 
-void usart_receive(char *str)
+void hil_receive(char *str)
 {
     for (int i = 0; i < RECEIVE_BYTES; i++)
     {

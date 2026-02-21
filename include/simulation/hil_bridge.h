@@ -21,8 +21,8 @@ typedef struct __attribute__((packed)) {
 /* --- Tek Fonksiyon --- */
 // Bu fonksiyonu main içinde çağırman yeterli olacak.
 void start_usb_hil_system(void);
-void usart_send(const char *str);
-void usart_receive(char *str);
+void hil_send(const char *str);
+void hil_receive(char *str);
 
 
 #endif
