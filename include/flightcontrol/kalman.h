@@ -4,95 +4,74 @@
 #include "ari_math/ari_matrix.h"
 
 
+template <int StateDim, int InputDim, int MeasDim>
 class Kalman
 {
 private:
-
-    /* Sytem matrix A (6,6) */
-    ari_Matrix6f A;
-
-    /* Control input matrix (6,3) which is compatible with measurement (3,1) */
-    ari_matrix<6,3> B;
-
-    /* State matrix (6,1): Describes the current state of the system as of euler angles, biases*/
-    ari_Vector6f x; 
-
-    /* Error covariance matrix (6,6) */
-    ari_Matrix6f P;
-
-    /* Process covariance matrix (6,6) */
-    ari_Matrix6f Q;
-
-    /* Measurement covariance matrix (2,2) */
-    ari_matrix<2,2> R;
-
-    /* Identity matrix (6,6) */
-    ari_Matrix6f I;
-
-    /* Kalman gain (6,2) */
-    ari_matrix<6,2> K;
-
-    /* Innovation covariance matrix (2,2) */
-    ari_matrix<2,2> S;
-
-    /* Observation matrix (2,6) */
-    ari_matrix <2,6> H;
-
-
-    float _dt;
+    /* --- System Matrices --- */
     
+    // State transition matrix (A): Relates the previous state to the current state
+    ari_matrix<StateDim, StateDim> A;
+    
+    // Control input matrix (B): Relates the optional control input to the state
+    ari_matrix<StateDim, InputDim> B;
+    
+    // Observation/Measurement matrix (H): Relates the state to the measurement
+    ari_matrix<MeasDim, StateDim> H;
+
+    /* --- State and Covariance Matrices --- */
+
+    // State vector (x): The estimated current state of the system
+    ari_matrix<StateDim, 1> x;
+    
+    // State estimate covariance matrix (P): Represents the uncertainty of the state estimate
+    ari_matrix<StateDim, StateDim> P;
+    
+    // Process noise covariance matrix (Q): Represents uncertainty in the system model
+    ari_matrix<StateDim, StateDim> Q;
+    
+    // Measurement noise covariance matrix (R): Represents uncertainty in the sensor readings
+    ari_matrix<MeasDim, MeasDim> R;
+    
+    // Identity matrix (I): Used for covariance update calculations
+    ari_matrix<StateDim, StateDim> I;
+
+    /* --- Intermediate Matrices for Calculations --- */
+
+    // Kalman Gain (K): Determines how much the measurement should correct the state estimate
+    ari_matrix<StateDim, MeasDim> K;
+    
+    // Innovation covariance (S): Represents the uncertainty of the measurement prediction
+    ari_matrix<MeasDim, MeasDim> S;
+
 public:
+    /**
+     * @brief Constructor to initialize the Kalman Filter with system parameters.
+     * * @param sys_A State transition matrix
+     * @param sys_B Control input matrix
+     * @param obs_H Observation/Measurement matrix
+     * @param cov_Q Process noise covariance matrix
+     * @param cov_R Measurement noise covariance matrix
+     * @param init_P Initial state estimate covariance matrix
+     */
+    Kalman(const ari_matrix<StateDim, StateDim>& sys_A,
+           const ari_matrix<StateDim, InputDim>& sys_B,
+           const ari_matrix<MeasDim, StateDim>& obs_H,
+           const ari_matrix<StateDim, StateDim>& cov_Q,
+           const ari_matrix<MeasDim, MeasDim>& cov_R,
+           const ari_matrix<StateDim, StateDim>& init_P) 
+    {
+        // Assign provided matrices to internal variables
+        A = sys_A;
+        B = sys_B;
+        H = obs_H;
+        Q = cov_Q;
+        R = cov_R;
+        P = init_P;
 
-    Kalman(float dt) : _dt(dt)
-    { 
-            /* System matrix A is considered as 
-        \theta_(k+1) = \theta_k + (w_theta - bias_theta) * dt   */
-        A = {
-            1.0f, 0.0f, 0.0f, -_dt, 0.0f, 0.0f,
-            0.0f, 1.0f, 0.0f, 0.0f, -_dt, 0.0f,
-            0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -_dt,
-            0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
-            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
-        };
-
-    /* Control input matrix (6,3) which is compatible with measurement (3,1) */
-        B = { _dt,0.0f,0,
-                        0,_dt,0,
-                        0,0,_dt,
-                        0,0,0,
-                        0,0,0,
-                        0,0,0};
-        /* Set P matrix */
-        P.setIdentity();
-        P = P * 0.1f;
-
-        /* Set Q matrix */
-        Q.setIdentity();
-
-        // Angle variances
-        Q(0,0) = 0.01f;
-        Q(1,1) = 0.01f;
-        Q(2,2) = 0.01f;
-
-        // Bias variances
-        Q(3,3) = 0.001f;
-        Q(4,4) = 0.001f;
-        Q(5,5) = 0.001f;
-
-        /* Set R matrix */
-        R.setIdentity();
-        R = R * 0.05f;  // Measurement (accelerometer) noise
-
-        /* Set Identity matrix */
-        I.setIdentity();
-
-        /* Set observation matrix */
-
-        
-
-
-
+            
+        // Setup the Identity matrix
+        I.setIdentity(); 
     }
 
     void predict(ari_Vector3f u)
