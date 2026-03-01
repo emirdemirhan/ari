@@ -60,7 +60,8 @@ public:
            const ari_matrix<MeasDim, StateDim>& obs_H,
            const ari_matrix<StateDim, StateDim>& cov_Q,
            const ari_matrix<MeasDim, MeasDim>& cov_R,
-           const ari_matrix<StateDim, StateDim>& init_P) 
+           const ari_matrix<StateDim, StateDim>& init_P,
+           float dt) 
     {
         // Assign provided matrices to internal variables
         A = sys_A;
@@ -69,6 +70,14 @@ public:
         Q = cov_Q;
         R = cov_R;
         P = init_P;
+
+        /* Set P to identity matrix scaled by 0.1f */
+        P.setIdentity();
+        P = P * 0.1f;
+
+        /* Set R matrix to identity matrix scaled by 0.05f */
+        R.setIdentity();
+        R = R * 0.05f;  // Measurement (accelerometer) noise
 
         // Initialize state vector to zero
         x.setZero(); 

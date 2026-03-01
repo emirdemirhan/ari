@@ -1,9 +1,65 @@
 #include "flightcontrol/kalman.h"
 #include "flightcontrol/stest_wrapper.h"
+#include "ari_math/ari_matrix.h"
 #include <cmath>
 
-Kalman filter_angles(Ts);
-Kalman filter_altitude(Ts);
+
+/* ********* Kalman filter angle prediction matrices ******************** */
+
+/* System matrix A is considered as 
+\theta_(k+1) = \theta_k + (w_theta - bias_theta) * dt   */
+ari_Matrix6f A = {
+            1.0f, 0.0f, 0.0f, -Ts, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f, -Ts, 0.0f,
+            0.0f, 0.0f, 1.0f, 0.0f, 0.0f, -Ts,
+            0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f,
+            0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f
+        };
+
+/* Control input matrix (6,3) which is compatible with measurement (3,1) */
+ari_matrix<6,3> B = { Ts,0.0f,0,
+                        0,Ts,0,
+                        0,0,Ts,
+                        0,0,0,
+                        0,0,0,
+                        0,0,0};
+
+/* Set P matrix */
+ari_matrix<6,6> P;
+
+
+/* Set Q matrix */
+/* Process covariance matrix (6,6) */
+ari_matrix<6,6> Q = {
+    // Angle variances (Roll, Pitch, Yaw)
+    0.01f,  0.0f,   0.0f,   0.0f,    0.0f,    0.0f,
+    0.0f,   0.01f,  0.0f,   0.0f,    0.0f,    0.0f,
+    0.0f,   0.0f,   0.01f,  0.0f,    0.0f,    0.0f,
+    
+    // Bias variances (X, Y, Z)
+    0.0f,   0.0f,   0.0f,   0.001f,  0.0f,    0.0f,
+    0.0f,   0.0f,   0.0f,   0.0f,    0.001f,  0.0f,
+    0.0f,   0.0f,   0.0f,   0.0f,    0.0f,    0.001f
+};
+
+
+/* Set R matrix */
+ari_matrix<2,2> R;
+
+
+
+/* Set H matrix */
+ari_matrix<2,6> H = {
+            1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f,
+            0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f
+        };
+
+Kalman<6,3,2> filter_angles(A, B, H, Q, R, P, Ts);
+
+
+
+//Kalman filter_altitude(Ts);
 
 #ifdef __cplusplus
 extern "C" {
