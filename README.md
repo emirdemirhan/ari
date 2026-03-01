@@ -10,3 +10,4 @@ Source code of nano UAV project ARI
 - SPI2 clock speed azaltıldı arttırılacak !!
 - Sensörlerle haberleşme için DMA kurulacak !!
 - Simülasyon kodları çıkarılacak
+- Altitude controller implemente edilip, simülasyonda denenecek, kalman filtresi altitude için implemente edilecek. (burda kaldık)
