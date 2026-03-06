@@ -3,6 +3,7 @@
 #include <libopencm3/stm32/usart.h>
 #include "peripherals.h"
 #include "drivers/delay.h"
+#include "ari_timer.h"
 
 void setup_perihperals(void)
 {
@@ -52,5 +53,8 @@ void setup_perihperals(void)
 
     /* DWT delay init */
     delay_init();
+
+    /* Timer init */
+    init_500hz_timer();
 
 }

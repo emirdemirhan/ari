@@ -41,6 +41,7 @@ clocksetup_err_t clock_config(void)
     rcc_periph_clock_enable(RCC_GPIOB);     // LED blink gpio port
     rcc_periph_clock_enable(RCC_SPI1);      // SPI communication port for NRF
     rcc_periph_clock_enable(RCC_SPI2);      // SPI communication port for BMI160
+    rcc_periph_clock_enable(RCC_TIM3);      // Timer 3 for 500 Hz control loop
 
     return clocksetup_success;
 }
