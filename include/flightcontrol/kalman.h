@@ -60,8 +60,7 @@ public:
            const ari_matrix<MeasDim, StateDim>& obs_H,
            const ari_matrix<StateDim, StateDim>& cov_Q,
            const ari_matrix<MeasDim, MeasDim>& cov_R,
-           const ari_matrix<StateDim, StateDim>& init_P,
-           float dt) 
+           const ari_matrix<StateDim, StateDim>& init_P) 
     {
         // Assign provided matrices to internal variables
         A = sys_A;
@@ -86,7 +85,7 @@ public:
         I.setIdentity(); 
     }
 
-    void predict(ari_Vector3f u)
+    void predict(ari_matrix<InputDim,1> u)
     {
         // Predict the current state
         x = A * x + B * u;
@@ -96,7 +95,7 @@ public:
 
     }
 
-    void update(ari_matrix<2,1> z)
+    void update(ari_matrix<MeasDim,1> z)
     {
         /* Update innovation matrix S = HPH' + R */
         S = H * P * H.transpose() + R;
@@ -112,11 +111,8 @@ public:
 
     }
 
-    /* Helper functions to get euler angles */
-    float getRoll(void){return x(0,0);}
-    float getPitch(void){return x(1,0);}
-    float getYaw(void){return x(2,0);}
-
+    /* Helper functions to get state variables */
+    float getState(int r, int k){return x(r,k);}
     
 };
 
