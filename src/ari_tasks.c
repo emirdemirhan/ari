@@ -63,6 +63,8 @@ static void task_comm(void *args) {
 static void task_control(void *args) {
     (void)args;
 
+    uint8_t loop_tick = 0;
+
     // Get reference values from communication task
     //cmd reference_cmd;
     //get_cmd(&reference_cmd);
@@ -75,15 +77,34 @@ static void task_control(void *args) {
     
     // Kalman filtresini deneyelim. Simülasyondan veri çekip uyguluyoruz.
 
+    // init pid coeffs
+
+    pid_coeffs v_pos;
+    pid_coeffs v_spd;
+
+    v_pos.Kp = 5;
+    v_pos.Ki = 5;
+    v_pos.Kd = 5;
+
+    v_spd.Kp = 5;
+    v_spd.Ki = 5;
+    v_spd.Kd = 5;
+
+
+    float heigth, v_speed, target_v, target_u;
     
     while (1) 
     {
-
-
+        if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) > 0)
+        {
+            
+        
+        
         char sim_data[16];
 
-        usart_receive(sim_data);
+        hil_receive(sim_data);
         
+        /*
         float roll, pitch, yaw;
 
         // --- ADIM C: Filtreye Gönder ---
@@ -97,18 +118,40 @@ static void task_control(void *args) {
         
         kalman_getangles(&roll, &pitch, &yaw);
 
-        /* İlk adım olarak yükseklik kontrolü deneyeceğiz */ 
+        // İlk adım olarak yükseklik kontrolü deneyeceğiz  
 
         // Kontrol işareti üretimi
         pid_coeffs K_angle, K_angle_rate;
 
-        calculate_pid(&K_angle, sim_data[6], sim_data[7], Ts);
+        calculate_pid(&K_angle, sim_data[6], sim_data[7], Ts); */
+
+        // Denemek için sadece altitude
 
 
+        // Predict (500hz)
+        kalman_predict_altitude(0,0,sim_data[0]);
+
+        if (loop_tick >= 10)
+        {
+            // Update (50hz)
+            kalman_update_altitude(sim_data[1]);
+            kalman_getaltitude(&heigth, &v_speed);
+            // Calculate outer loop
+            target_v = calculate_pid(&v_pos, sim_data[2], heigth, 0.02);
+            
+            
+        }
+        
+        kalman_getaltitude(&heigth, &v_speed);
+
+        // Calculate inner loop
+        target_u = calculate_pid(&v_spd, target_v, v_speed, 0.002);
+
+        hil_send((uint8_t)target_u);
 
         
+        }
     }
-    
     
 }
 
