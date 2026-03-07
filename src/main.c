@@ -16,6 +16,9 @@ int main(void) {
  
 
     // Start blink task
+    blink_task_start();
+
+    // Start control task
     control_task_start();
     
     /* Start RTOS */
