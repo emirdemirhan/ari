@@ -11,7 +11,7 @@ clocksetup_err_t clock_config(void)
     static const struct rcc_clock_scale rcc_hse_8mhz_to_100mhz = {
    
     .pllm = 8,    // 8 MHz / 8 = 1 MHz 
-    .plln = 192,  // 1 MHz * 200 = 200 MHz (VCO)
+    .plln = 200,  // 1 MHz * 200 = 200 MHz (VCO)
     .pllp = 2,    // 200 MHz / 2 = 100 MHz (Sysclk)
     
     .pllq = 4,    // USB

@@ -18,9 +18,9 @@ void init_500hz_timer(void)
     // 3. Timer Temel Mod Ayarları (Yukarı sayan, düz timer)
     timer_set_mode(TIM3, TIM_CR1_CKD_CK_INT, TIM_CR1_CMS_EDGE, TIM_CR1_DIR_UP);
     
-    // 4. Frekans Matematiği (APB1 hattının 96 MHz'de çalıştığı varsayımıyla)
+    // 4. Frekans Matematiği (APB1 hattının 100 MHz'de çalıştığı varsayımıyla)
     // Prescaler: İşlemci saatini 1 MHz'e (mikrosaniye) düşür
-    timer_set_prescaler(TIM3, 96 - 1); 
+    timer_set_prescaler(TIM3, 100 - 1); 
     
     // Period (ARR): 2000 mikrosaniyede bir taşma yapsın (1.000.000 / 2000us = 500 Hz)
     timer_set_period(TIM3, 2000 - 1);
