@@ -149,7 +149,7 @@ void kalman_update_altitude(float hz)
 {
     ari_matrix <1,1> meas_h = {hz};
 
-    filter_altitude.predict(meas_h);
+    filter_altitude.update(meas_h);
 }
 
 void kalman_getaltitude(float *height, float *v_speed)

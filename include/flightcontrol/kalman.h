@@ -78,8 +78,6 @@ public:
         R.setIdentity();
         R = R * 0.05f;  // Measurement (accelerometer) noise
 
-        // Initialize state vector to zero
-        x.setZero(); 
         
         // Setup the Identity matrix
         I.setIdentity(); 
@@ -100,8 +98,11 @@ public:
         /* Update innovation matrix S = HPH' + R */
         S = H * P * H.transpose() + R;
 
+        ari_matrix<MeasDim, MeasDim> S_inv;
+        if (!S.inverse(S_inv)) return;  // singular → skip
+
         /* Update Kalman gain matrix K = PH'(HPH'+R)⁻¹ */
-        K = P * H.transpose() * S.inverse(S);
+        K = P * H.transpose() * S_inv;
 
         /* Update the state according to the measurements */
         x = x + K * (z - H * x);
