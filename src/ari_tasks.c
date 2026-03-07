@@ -12,6 +12,9 @@
 #include "flightcontrol/pid.h"
 
 
+/* Task Handles */
+TaskHandle_t control_task_handle = NULL;
+
 
 /* FreeRTOS task: LED Blink */
 static void task_blink(void *args) {
@@ -62,6 +65,8 @@ static void task_comm(void *args) {
 /* FreeRTOS task: Control Task */
 static void task_control(void *args) {
     (void)args;
+    
+    
 
     uint8_t loop_tick = 0;
 
@@ -85,69 +90,76 @@ static void task_control(void *args) {
     v_pos.Kp = 5;
     v_pos.Ki = 5;
     v_pos.Kd = 5;
+    v_pos.e_prev = 0;
+    v_pos.e_sum = 0;        
 
     v_spd.Kp = 5;
     v_spd.Ki = 5;
     v_spd.Kd = 5;
+    v_spd.e_prev = 0;
+    v_spd.e_sum = 0;
 
+    HIL_Sim_Data_t sim_data;
 
-    float heigth, v_speed, target_v, target_u;
-    
+    float heigth = 0, v_speed = 0, target_v = 0, target_u = 0;    
     while (1) 
     {
         if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) > 0)
         {
+        
+            hil_receive_full_packet(&sim_data);
+
+            //hil_receive(sim_data);
             
-        
-        
-        char sim_data[16];
+            /*
+            float roll, pitch, yaw;
 
-        hil_receive(sim_data);
-        
-        /*
-        float roll, pitch, yaw;
+            // --- ADIM C: Filtreye Gönder ---
+            // Gyro verisiyle TAHMİN (Predict) yap (1kHz döngüde burası çalışmalı)
+            kalman_predict(sim_data[0], sim_data[1], sim_data[2]); // dt = 0.001s (1kHz varsayım)
 
-        // --- ADIM C: Filtreye Gönder ---
-        // Gyro verisiyle TAHMİN (Predict) yap (1kHz döngüde burası çalışmalı)
-        kalman_predict(sim_data[0], sim_data[1], sim_data[2]); // dt = 0.001s (1kHz varsayım)
+            // İvmeölçer verisiyle DÜZELTME (Update) yap
+            kalman_update(sim_data[3], sim_data[4], sim_data[5]);
+            
+            // --- ADIM D: Açıyı Al ---
+            
+            kalman_getangles(&roll, &pitch, &yaw);
 
-        // İvmeölçer verisiyle DÜZELTME (Update) yap
-        kalman_update(sim_data[3], sim_data[4], sim_data[5]);
-        
-        // --- ADIM D: Açıyı Al ---
-        
-        kalman_getangles(&roll, &pitch, &yaw);
+            // İlk adım olarak yükseklik kontrolü deneyeceğiz  
 
-        // İlk adım olarak yükseklik kontrolü deneyeceğiz  
+            // Kontrol işareti üretimi
+            pid_coeffs K_angle, K_angle_rate;
 
-        // Kontrol işareti üretimi
-        pid_coeffs K_angle, K_angle_rate;
+            calculate_pid(&K_angle, sim_data[6], sim_data[7], Ts); 
 
-        calculate_pid(&K_angle, sim_data[6], sim_data[7], Ts); */
+            */
 
-        // Denemek için sadece altitude
+            // Denemek için sadece altitude
 
 
-        // Predict (500hz)
-        kalman_predict_altitude(0,0,sim_data[0]);
+            // Predict (500hz)
+            kalman_predict_altitude(0,0,sim_data.gyro[2]);
 
-        if (loop_tick >= 10)
-        {
-            // Update (50hz)
-            kalman_update_altitude(sim_data[1]);
+            if (loop_tick >= 10)
+            {
+                // Update (50hz)
+                kalman_update_altitude(sim_data.altitude_z);
+                kalman_getaltitude(&heigth, &v_speed);
+                // Calculate outer loop
+                target_v = calculate_pid(&v_pos, sim_data.rc_thrust, heigth, 0.02);
+                loop_tick = 0;
+                
+                
+            }
+            
             kalman_getaltitude(&heigth, &v_speed);
-            // Calculate outer loop
-            target_v = calculate_pid(&v_pos, sim_data[2], heigth, 0.02);
-            
-            
-        }
-        
-        kalman_getaltitude(&heigth, &v_speed);
 
-        // Calculate inner loop
-        target_u = calculate_pid(&v_spd, target_v, v_speed, 0.002);
+            // Calculate inner loop
+            target_u = calculate_pid(&v_spd, target_v, v_speed, 0.002);
 
-        hil_send((uint8_t)target_u);
+            hil_send_packet(target_u);
+
+            loop_tick++;
 
         
         }
@@ -165,7 +177,7 @@ void communication_task_start(void)
 void control_task_start(void)
 {
     // Create control task
-    xTaskCreate(task_control, "Control_Task", 1024*4, NULL, 2, NULL);
+    xTaskCreate(task_control, "Control_Task", 1024*4, NULL, 2, &control_task_handle);
 
 
 }

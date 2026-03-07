@@ -1,6 +1,9 @@
 #ifndef ARI_TASKS_H
 #define ARI_TASKS_H
 
+#include "FreeRTOS.h"
+#include "task.h"
+
 
 // Define functions
 void blink_task_start(void);
