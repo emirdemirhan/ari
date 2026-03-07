@@ -3,39 +3,43 @@
 
 #include <stdint.h>
 
-#define MAX_U  100  // Actuator saturation
-#define MAX_I  50   // Integral saturation
-
+#define MAX_U  100.0f
+#define MAX_I  50.0f
 
 typedef struct pid
 {
     float Kp;
     float Ki;
     float Kd;
+    float e_prev;
+    float e_sum;
+} pid_coeffs;
 
-}pid_coeffs;
-
-
-/* Calculate PID according to the classical PID formula:
-    - u[k] = Kp.e + Kd . (e - e_prev)/dt + Ki . (e + e_sum)
-    returns u  */
 static inline float calculate_pid(pid_coeffs* pid, float r, float y, float ts)
 {
-    
-
-    float u = 0;
-    float e_prev = 0;
-    float e_sum = 0;
-
     float e = r - y;
 
-    u = pid->Kp * e + pid->Kd * (e - e_prev)*(1/ts) + pid->Ki + (e + e_sum)*ts;
+    // Integral birikimi
+    pid->e_sum += e * ts;
 
-    e_prev = e;
-    e_sum += e; 
+    // Anti-windup: integral saturasyonu
+    if (pid->e_sum > MAX_I) pid->e_sum = MAX_I;
+    else if (pid->e_sum < -MAX_I) pid->e_sum = -MAX_I;
+
+    // PID hesabı
+    float P = pid->Kp * e;
+    float I = pid->Ki * pid->e_sum;
+    float D = pid->Kd * (e - pid->e_prev) / ts;
+
+    float u = P + I + D;
+
+    // Çıkış saturasyonu
+    if (u > MAX_U) u = MAX_U;
+    else if (u < -MAX_U) u = 0.0f; // Motor komutları negatif olamaz, 0'a saturate
+
+    pid->e_prev = e;
 
     return u;
-
-}   
+}
 
 #endif
