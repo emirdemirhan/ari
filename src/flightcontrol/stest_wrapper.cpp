@@ -139,7 +139,7 @@ void kalman_getangles(float* roll, float* pitch, float* yaw)
 
 void kalman_predict_altitude(float wx, float wy, float wz)
 {
-    ari_matrix <1,1> u = {wz - 1.0f};
+    ari_matrix <1,1> u = {wz - 9.81f}; // Gyro Z ekseninden açısal hız, yerçekimi etkisi çıkarıldı
 
     filter_altitude.predict(u);
 
@@ -154,8 +154,8 @@ void kalman_update_altitude(float hz)
 
 void kalman_getaltitude(float *height, float *v_speed)
 {
-    *height = filter_altitude.getState(1,0);
-    *v_speed = filter_altitude.getState(2,0);
+    *height = filter_altitude.getState(0,0);
+    *v_speed = filter_altitude.getState(1,0);
 }
 
 

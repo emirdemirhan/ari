@@ -2,7 +2,7 @@
 #define STEST_WRAPPER_H
 
 
-#define Ts  0.01    // Define sampling time (dt)
+#define Ts  0.002    // Define sampling time (dt)
 
 
 #ifdef __cplusplus
