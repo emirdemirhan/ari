@@ -87,17 +87,24 @@ static void task_control(void *args) {
     pid_coeffs v_pos;
     pid_coeffs v_spd;
 
-    v_pos.Kp = 5;
-    v_pos.Ki = 5;
-    v_pos.Kd = 5;
-    v_pos.e_prev = 0;
-    v_pos.e_sum = 0;        
+    v_pos.Kp = 1.0f;   // 1m hata = 1 m/s hız isteği (Çok daha sakin!)
+    v_pos.Ki = 0.0f;   // Dış döngüde I genelde kullanılmaz (İç döngü halleder)
+    v_pos.Kd = 0.0f;
+    v_pos.e_prev = 0.0f;
+    v_pos.e_sum = 0.0f;
+    v_pos.max_i = 1.0f;
+    v_pos.out_max = 2.0f;  // Maksimum 2 m/s hızla tırmanabilir
+    v_pos.out_min = -1.5f; // Maksimum 1.5 m/s hızla alçalabilir (Negatif olabilir!)
 
-    v_spd.Kp = 5;
-    v_spd.Ki = 5;
-    v_spd.Kd = 5;
-    v_spd.e_prev = 0;
-    v_spd.e_sum = 0;
+    // --- İÇ DÖNGÜ (Hız -> Düzeltme PWM'i) ---
+    v_spd.Kp = 5.0f;  // 1 m/s hız hatasında motora %15 ekstra güç ver
+    v_spd.Ki = 1.5f;
+    v_spd.Kd = 0.1f;   // Damping için ufak bir D eklendi
+    v_spd.e_prev = 0.0f;
+    v_spd.e_sum = 0.0f;
+    v_spd.max_i = 10.0f; // İç integral limiti
+    v_spd.out_max = 20.0f;  // Hover üstüne maksimum %+40 düzeltme
+    v_spd.out_min = -20.0f; // Hover altından maksimum %-40 kısma
 
     HIL_Sim_Data_t sim_data;
 
@@ -138,7 +145,7 @@ static void task_control(void *args) {
 
 
             // Predict (500hz)
-            kalman_predict_altitude(0,0,sim_data.gyro[2]);
+            kalman_predict_altitude(0,0,sim_data.accel[2]); // accel Z ekseninden ivme, yerçekimi etkisi çıkarıldı
 
             if (loop_tick >= 10)
             {
@@ -146,7 +153,7 @@ static void task_control(void *args) {
                 kalman_update_altitude(sim_data.altitude_z);
                 kalman_getaltitude(&heigth, &v_speed);
                 // Calculate outer loop
-                target_v = calculate_pid(&v_pos, sim_data.rc_thrust, heigth, 0.02);
+                target_v = calculate_pid(&v_pos, 5.0f, heigth, 0.02);
                 loop_tick = 0;
                 
                 
@@ -155,9 +162,19 @@ static void task_control(void *args) {
             kalman_getaltitude(&heigth, &v_speed);
 
             // Calculate inner loop
-            target_u = calculate_pid(&v_spd, target_v, v_speed, 0.002);
+            float pid_correction = calculate_pid(&v_spd, target_v, v_speed, 0.002f);
 
-            hil_send_packet(target_u);
+            // Helikopterini havada sabit tuttuğunu varsaydığımız temel güç (Bunu simülasyonda deneyerek bulmalısın, örn: %55)
+            float HOVER_BASE = 50.0f; 
+
+            // Gerçek motor komutu = Askı Gücü + PID Düzeltmesi
+            target_u = HOVER_BASE + pid_correction;
+
+            // Motorlara %0'dan az, %100'den fazla güç gitmesini engelle (Fiziksel Kırpma)
+            if (target_u > 100.0f) target_u = 100.0f;
+            if (target_u < 5.0f) target_u = 5.0f;
+
+            hil_send_motor_cmds(target_u, heigth);
 
             loop_tick++;
 
