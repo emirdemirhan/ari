@@ -3,28 +3,24 @@
 
 #include <stdint.h>
 
-#define MAX_U  100.0f
-#define MAX_I  50.0f
-
-typedef struct pid
-{
+typedef struct pid {
     float Kp;
     float Ki;
     float Kd;
     float e_prev;
     float e_sum;
+    float max_i;   // İntegral rüzgarlanma limiti
+    float out_min; // Döngüye özel minimum çıkış
+    float out_max; // Döngüye özel maksimum çıkış
 } pid_coeffs;
 
-static inline float calculate_pid(pid_coeffs* pid, float r, float y, float ts)
-{
+static inline float calculate_pid(pid_coeffs* pid, float r, float y, float ts) {
     float e = r - y;
 
-    // Integral birikimi
+    // Integral birikimi ve Anti-windup
     pid->e_sum += e * ts;
-
-    // Anti-windup: integral saturasyonu
-    if (pid->e_sum > MAX_I) pid->e_sum = MAX_I;
-    else if (pid->e_sum < -MAX_I) pid->e_sum = -MAX_I;
+    if (pid->e_sum > pid->max_i) pid->e_sum = pid->max_i;
+    else if (pid->e_sum < -pid->max_i) pid->e_sum = -pid->max_i;
 
     // PID hesabı
     float P = pid->Kp * e;
@@ -33,9 +29,9 @@ static inline float calculate_pid(pid_coeffs* pid, float r, float y, float ts)
 
     float u = P + I + D;
 
-    // Çıkış saturasyonu
-    if (u > MAX_U) u = MAX_U;
-    else if (u < -MAX_U) u = 0.0f; // Motor komutları negatif olamaz, 0'a saturate
+    // Dinamik Çıkış Saturasyonu (Her döngünün kendi limitlerine göre)
+    if (u > pid->out_max) u = pid->out_max;
+    else if (u < pid->out_min) u = pid->out_min;
 
     pid->e_prev = e;
 
