@@ -47,6 +47,29 @@ uint8_t hil_receive_full_packet(HIL_Sim_Data_t *data_out) {
     }
 }
 
+void hil_send_motor_cmds(float main_pwm, float tail_pwm) {
+    HIL_Motor_Data_t motors;
+    motors.main_motor_pwm = main_pwm;
+    motors.tail_motor_pwm = tail_pwm;
+
+    uint8_t *ptr = (uint8_t *)&motors;
+    uint8_t checksum = 0;
+
+    // 1. Çift Header Gönder
+    usart_send_blocking(USART1, HIL_HEADER_1);
+    usart_send_blocking(USART1, HIL_HEADER_2);
+
+    // 2. Payload Gönder ve Checksum Hesapla
+    for (int i = 0; i < sizeof(HIL_Motor_Data_t); i++) {
+        usart_send_blocking(USART1, ptr[i]);
+        checksum ^= ptr[i];
+    }
+
+    // 3. Checksum ve Footer Gönder
+    usart_send_blocking(USART1, checksum);
+    usart_send_blocking(USART1, HIL_FOOTER);
+}
+
 
 /* --- YARDIMCI GÖNDERME FONKSİYONU --- */
 void hil_send(const char *str) {

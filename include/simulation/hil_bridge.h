@@ -25,6 +25,13 @@ typedef struct __attribute__((packed)) {
     float true_yaw;
 } HIL_Sim_Data_t;
 
+
+typedef struct __attribute__((packed)) {
+    float main_motor_pwm; // 4 Byte
+    float tail_motor_pwm; // 4 Byte
+} HIL_Motor_Data_t;
+
+
 #define RECEIVE_BYTES   56 // HIL_Sim_Data_t'nin byte cinsinden boyutu (7 float * 4 byte/float = 28 byte) * 2 (header+footer) = 56 byte
 
 /* --- Tek Fonksiyon --- */
@@ -34,5 +41,6 @@ void hil_send(const char *str);
 void hil_receive(char *str);
 void hil_send_float(float val);
 uint8_t hil_receive_full_packet(HIL_Sim_Data_t *data_out);
+void hil_send_motor_cmds(float main_pwm, float tail_pwm);
 
 #endif
