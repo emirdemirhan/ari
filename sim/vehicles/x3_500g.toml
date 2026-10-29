@@ -1,0 +1,68 @@
+# 500 g X-quad, matching Simulation/Gazebosim/drone.sdf (mass, inertia, rotor positions,
+# landing gear) and the old bridge's motor model (3 N per rotor at 100 %, thrust linear in
+# the command), plus everything the Gazebo setup left out: motor lag, rotor drag, yaw torque
+# from rotor drag and spin-up, ground effect, battery sag, body drag and BMI160-class IMU errors.
+#
+# Replace these values with measurements of the real ARI airframe before trusting a PIL
+# result: weigh it, measure thrust and rpm per command on a thrust stand, and measure the
+# motor step response.
+
+name = "x3_500g"
+description = "500 g X-quad from drone.sdf, 5 inch props, 3S LiPo, BMI160 + VL53L1X"
+
+[body]
+mass_kg = 0.5
+inertia_kg_m2 = [0.005, 0.005, 0.01]
+drag_area_m2 = [0.008, 0.008, 0.015]
+rotational_damping_nms = [0.0005, 0.0005, 0.0005]
+
+[rotor]
+# M1 front-right CCW, M2 rear-left CCW, M3 front-left CW, M4 rear-right CW (firmware order)
+positions_m = [[0.13, -0.22, 0.023], [-0.13, 0.22, 0.023], [0.13, 0.22, 0.023], [-0.13, -0.22, 0.023]]
+spin = ["ccw", "ccw", "cw", "cw"]
+diameter_m = 0.127
+max_thrust_n = 3.0
+max_rpm = 17000
+torque_to_thrust_m = 0.016
+inertia_kg_m2 = 6e-6
+rotor_drag_accel_per_mps = 0.35
+climb_thrust_loss_per_mps = 0.05
+ground_effect = true
+
+[motor]
+time_constant_up_s = 0.030
+time_constant_down_s = 0.050
+esc_curve_exponent = 0.5        # thrust linear in command, like the old Gazebo bridge
+start_command = 0.02
+reference_voltage_v = 11.55
+voltage_scaling = true
+esc_delay_s = 0.002
+
+[battery]
+enabled = true
+cells = 3
+capacity_mah = 1300
+internal_resistance_ohm = 0.03
+initial_soc = 0.95
+drive_efficiency = 0.70
+aux_current_a = 0.3
+
+[gear]
+contact_points_m = [[0.06, 0.06, -0.05], [-0.06, 0.06, -0.05], [0.06, -0.06, -0.05], [-0.06, -0.06, -0.05], [0.0, 0.0, 0.04]]
+stiffness_n_per_m = 2000
+damping_ns_per_m = 25
+friction = 0.6
+
+[imu]
+position_m = [0.0, 0.0, 0.0]
+odr_hz = 800
+vibration_accel_g = 0.3
+vibration_accel_z_g = 0.15
+vibration_gyro_dps = 1.5
+
+[rangefinder]
+enabled = true
+position_m = [0.12, 0.0, 0.0]
+max_range_m = 4.0
+rate_hz = 50
+latency_s = 0.030

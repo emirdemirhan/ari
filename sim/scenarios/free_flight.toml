@@ -1,0 +1,20 @@
+# Used by `python3 -m arisim fly` (joystick). Setpoints here are ignored; the stick is the pilot.
+name = "free_flight"
+description = "Manual flight, light wind"
+duration_s = 600
+seed = 10
+
+[wind]
+mean_mps = [1.0, 0.5, 0.0]
+turbulence_sigma_mps = [0.4, 0.4, 0.15]
+turbulence_tau_s = 2.0
+
+[[terrain]]
+center_m = [3.0, 0.0]
+size_m = [1.0, 1.0]
+height_m = 0.5
+
+[[terrain]]
+center_m = [-2.0, 3.0]
+size_m = [2.0, 0.6]
+height_m = 0.8

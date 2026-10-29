@@ -29,3 +29,8 @@ Thumbs.db
 # libopencm3 bir submodule olduğu için klasörün kendisi kalmalı
 # ama içindeki derleme çöplerini istemeyiz (eğer submodule içinde derlediysen)
 libopencm3/lib/libopencm3_stm32*.a
+
+# --- Simulator ---
+sim/runs/
+__pycache__/
+.pytest_cache/

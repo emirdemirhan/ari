@@ -1,0 +1,29 @@
+name = "battery_sag"
+description = "Hover at 1 m for 90 s starting from 35 % charge"
+duration_s = 90
+seed = 9
+
+[vehicle_overrides.battery]
+initial_soc = 0.35
+
+[[setpoints]]
+t = 0.0
+altitude_m = 0.0
+
+[[setpoints]]
+t = 1.0
+altitude_m = 1.0
+
+[[criteria]]
+metric = "height_error_final_m"
+max = 0.15
+window = [30, 40]
+
+[[criteria]]
+metric = "height_error_final_m"
+max = 0.15
+window = [80, 90]
+
+[[criteria]]
+metric = "battery_min_v"
+min = 10.0

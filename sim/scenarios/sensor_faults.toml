@@ -1,0 +1,44 @@
+name = "sensor_faults"
+description = "Hover at 1.5 m: gyro bias step 3 dps (10 s), accel bias step 50 mg (16 s), rangefinder blocked 2 s (22 s)"
+duration_s = 30
+seed = 7
+
+[[setpoints]]
+t = 0.0
+altitude_m = 0.0
+
+[[setpoints]]
+t = 1.0
+altitude_m = 1.5
+
+[[faults]]
+t = 10.0
+type = "gyro_bias_step"
+value = [3.0, -3.0, 2.0]
+
+[[faults]]
+t = 16.0
+type = "accel_bias_step"
+value = [50.0, 0.0, 0.0]
+
+[[faults]]
+t = 22.0
+type = "range_blocked"
+duration_s = 2.0
+
+[[criteria]]
+metric = "est_tilt_error_max_deg"
+estimator = "kf"
+max = 5.0
+window = [10, 22]
+
+[[criteria]]
+metric = "est_tilt_error_max_deg"
+estimator = "eskf"
+max = 5.0
+window = [10, 22]
+
+[[criteria]]
+metric = "height_rmse_m"
+max = 0.5
+window = [21, 30]

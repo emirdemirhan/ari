@@ -1,0 +1,45 @@
+name = "yaw_while_tilted"
+description = "Pitch stick 0.6 (18 deg) held while yawing at 1.5 rad/s for 3 s: Euler coupling"
+duration_s = 22
+seed = 4
+
+[[setpoints]]
+t = 0.0
+altitude_m = 0.0
+
+[[setpoints]]
+t = 1.0
+altitude_m = 2.0
+
+[[setpoints]]
+t = 8.0
+pitch = 0.6
+
+[[setpoints]]
+t = 10.0
+yaw_rate = 1.5
+
+[[setpoints]]
+t = 13.0
+yaw_rate = 0.0
+
+[[setpoints]]
+t = 15.0
+pitch = 0.0
+
+[[criteria]]
+metric = "est_tilt_error_max_deg"
+estimator = "kf"
+max = 3.0
+window = [8, 22]
+
+[[criteria]]
+metric = "est_tilt_error_max_deg"
+estimator = "eskf"
+max = 3.0
+window = [8, 22]
+
+[[criteria]]
+metric = "yaw_rate_tracking_rmse_dps"
+max = 15.0
+window = [10.5, 13]

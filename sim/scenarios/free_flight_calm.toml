@@ -1,0 +1,10 @@
+# `python3 -m arisim fly --scenario scenarios/free_flight_calm.toml`: manual flight without wind.
+# free_flight.toml has a 1.1 m/s breeze towards forward-left; without position hold a level
+# quad drifts with it, as a real one would.
+base = "free_flight.toml"
+name = "free_flight_calm"
+description = "Manual flight, no wind"
+
+[wind]
+mean_mps = [0.0, 0.0, 0.0]
+turbulence_sigma_mps = [0.0, 0.0, 0.0]

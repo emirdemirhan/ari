@@ -1,0 +1,6 @@
+# Same flight as hover.toml with perfect sensors, no ESC delay and no battery sag.
+# Passing here but failing hover.toml means the sensor realism is what breaks the controller.
+base = "hover.toml"
+name = "hover_ideal"
+description = "hover.toml on x3_500g_ideal: perfect sensors, no delay, no battery sag"
+vehicle = "x3_500g_ideal"

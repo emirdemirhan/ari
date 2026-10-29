@@ -1,0 +1,50 @@
+name = "hover"
+description = "Take off to 1 m and hold for 20 s in still air"
+duration_s = 25
+seed = 1
+
+[[setpoints]]
+t = 0.0
+altitude_m = 0.0
+
+[[setpoints]]
+t = 2.0
+altitude_m = 1.0
+
+[[criteria]]
+metric = "height_error_final_m"
+max = 0.10
+window = [15, 25]
+
+[[criteria]]
+metric = "height_overshoot_m"
+max = 0.30
+window = [2, 25]
+
+[[criteria]]
+metric = "tilt_max_deg"
+max = 5.0
+window = [5, 25]
+
+# There is no position hold, so the vehicle drifts with its attitude error (accelerometer
+# bias and misalignment). This only catches a runaway.
+[[criteria]]
+metric = "drift_xy_max_m"
+max = 15.0
+window = [5, 25]
+
+[[criteria]]
+metric = "est_tilt_error_max_deg"
+estimator = "kf"
+max = 2.0
+window = [5, 25]
+
+[[criteria]]
+metric = "est_tilt_error_max_deg"
+estimator = "eskf"
+max = 2.0
+window = [5, 25]
+
+[[criteria]]
+metric = "exec_time_max_us"
+max = 1000

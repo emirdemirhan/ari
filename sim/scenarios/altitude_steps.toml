@@ -1,0 +1,57 @@
+name = "altitude_steps"
+description = "Altitude reference steps 1.0 -> 2.0 -> 0.5 -> 1.5 m"
+duration_s = 40
+seed = 2
+
+[[setpoints]]
+t = 0.0
+altitude_m = 0.0
+
+[[setpoints]]
+t = 2.0
+altitude_m = 1.0
+
+[[setpoints]]
+t = 12.0
+altitude_m = 2.0
+
+[[setpoints]]
+t = 22.0
+altitude_m = 0.5
+
+[[setpoints]]
+t = 32.0
+altitude_m = 1.5
+
+[[criteria]]
+metric = "height_error_final_m"
+max = 0.10
+window = [9, 12]
+
+[[criteria]]
+metric = "height_error_final_m"
+max = 0.10
+window = [19, 22]
+
+[[criteria]]
+metric = "height_error_final_m"
+max = 0.10
+window = [29, 32]
+
+# Overshoot of the 1 -> 2 m step only; after the step down at 22 s the vehicle is above the
+# reference by design until it descends.
+[[criteria]]
+metric = "height_overshoot_m"
+max = 0.30
+window = [12, 22]
+
+[[criteria]]
+metric = "est_height_error_max_m"
+estimator = "active"
+max = 0.15
+window = [5, 40]
+
+[[criteria]]
+metric = "motor_saturation_percent"
+max = 5.0
+window = [5, 40]

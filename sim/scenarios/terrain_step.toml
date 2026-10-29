@@ -1,0 +1,34 @@
+name = "terrain_step"
+description = "Fly forward at 1.2 m over a 0.4 m high table: rangefinder jump"
+duration_s = 22
+seed = 8
+
+[[setpoints]]
+t = 0.0
+altitude_m = 0.0
+
+[[setpoints]]
+t = 1.0
+altitude_m = 1.2
+
+[[setpoints]]
+t = 8.0
+pitch = 0.25
+
+[[setpoints]]
+t = 12.0
+pitch = 0.0
+
+[[terrain]]
+center_m = [3.5, 0.0]
+size_m = [1.5, 20.0]
+height_m = 0.4
+
+[[criteria]]
+metric = "height_rmse_m"
+max = 0.25
+window = [8, 22]
+
+[[criteria]]
+metric = "tilt_max_deg"
+max = 15.0

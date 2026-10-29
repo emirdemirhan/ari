@@ -1,0 +1,9 @@
+# Same airframe with an ESC whose rotor speed is linear in the command, so thrust grows with
+# the square of the command. Most ESCs without thrust linearisation behave closer to this
+# than to the linear default; hover moves from about 41 % to about 64 % of the command range.
+base = "x3_500g.toml"
+name = "x3_500g_raw_esc"
+description = "x3_500g with rpm linear in command (thrust ~ command^2)"
+
+[motor]
+esc_curve_exponent = 1.0

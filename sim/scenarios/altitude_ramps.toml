@@ -1,0 +1,43 @@
+name = "altitude_ramps"
+description = "Altitude reference ramps like holding R1 / L1 on the gamepad (1 m/s): 0.5 -> 2.0 -> 1.0 m"
+duration_s = 22
+seed = 11
+
+[[setpoints]]
+t = 0.0
+altitude_m = 0.0
+
+[[setpoints]]
+t = 1.0
+altitude_m = 0.5
+
+[[setpoints]]
+t = 8.0
+altitude_m = 2.0
+ramp_s = 1.5
+
+[[setpoints]]
+t = 15.0
+altitude_m = 1.0
+ramp_s = 1.0
+
+# Lag while ramping and settling after the ramp ends
+[[criteria]]
+metric = "height_rmse_m"
+max = 0.10
+window = [8, 22]
+
+[[criteria]]
+metric = "height_overshoot_m"
+max = 0.10
+window = [9.5, 15]
+
+[[criteria]]
+metric = "height_error_final_m"
+max = 0.05
+window = [12, 15]
+
+[[criteria]]
+metric = "height_error_final_m"
+max = 0.05
+window = [19, 22]

@@ -1,0 +1,34 @@
+# Same airframe with every sensor error, vibration, delay and battery effect switched off.
+# Use it to tell a control problem from a sensing problem: if a scenario passes here and
+# fails on x3_500g, the sensor models are what break it.
+base = "x3_500g.toml"
+name = "x3_500g_ideal"
+description = "x3_500g with ideal sensors, no ESC delay, no battery sag"
+
+[motor]
+esc_delay_s = 0.0
+
+[battery]
+enabled = false
+
+[imu]
+quantize = false
+gyro_noise_density_dps_rthz = 0.0
+gyro_bias_sigma_dps = 0.0
+gyro_bias_rw_dps_rts = 0.0
+gyro_scale_sigma = 0.0
+gyro_misalign_sigma_rad = 0.0
+accel_noise_density_ug_rthz = 0.0
+accel_bias_sigma_mg = 0.0
+accel_bias_rw_mg_rts = 0.0
+accel_scale_sigma = 0.0
+accel_misalign_sigma_rad = 0.0
+vibration_accel_g = 0.0
+vibration_accel_z_g = 0.0
+vibration_gyro_dps = 0.0
+
+[rangefinder]
+noise_sigma_m = 0.0
+noise_sigma_fraction = 0.0
+latency_s = 0.0
+outlier_probability = 0.0

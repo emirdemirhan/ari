@@ -1,0 +1,33 @@
+name = "motor_degraded"
+description = "Hover at 1.5 m; M2 (rear-left) loses 20 % thrust at 10 s (chipped prop)"
+duration_s = 25
+seed = 6
+
+[[setpoints]]
+t = 0.0
+altitude_m = 0.0
+
+[[setpoints]]
+t = 1.0
+altitude_m = 1.5
+
+[[faults]]
+t = 10.0
+type = "motor_scale"
+motor = 2
+value = 0.8
+
+[[criteria]]
+metric = "tilt_max_deg"
+max = 10.0
+window = [10, 25]
+
+[[criteria]]
+metric = "height_rmse_m"
+max = 0.3
+window = [10, 25]
+
+[[criteria]]
+metric = "motor_saturation_percent"
+max = 5.0
+window = [12, 25]

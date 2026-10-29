@@ -1,0 +1,94 @@
+name = "aggressive_altitude"
+description = "Fast altitude jumps 0.5 <-> 3 m (2 m/s ramps) while rolling and pitching at full stick"
+duration_s = 40
+seed = 13
+
+[wind]
+mean_mps = [1.0, 0.5, 0.0]
+turbulence_sigma_mps = [0.4, 0.4, 0.15]
+turbulence_tau_s = 2.0
+
+[[setpoints]]
+t = 0.0
+altitude_m = 0.0
+
+[[setpoints]]
+t = 2.5
+altitude_m = 1.5
+ramp_s = 1.0
+
+[[setpoints]]
+t = 7.0
+altitude_m = 3.0
+ramp_s = 0.75
+
+[[setpoints]]
+t = 8.0
+roll = 1.0
+
+[[setpoints]]
+t = 9.0
+roll = -1.0
+altitude_m = 0.5
+ramp_s = 1.25
+
+[[setpoints]]
+t = 10.5
+roll = 0.0
+pitch = 1.0
+
+[[setpoints]]
+t = 12.0
+pitch = -1.0
+altitude_m = 3.0
+ramp_s = 1.25
+
+[[setpoints]]
+t = 13.5
+pitch = 0.0
+
+[[setpoints]]
+t = 16.0
+altitude_m = 0.5
+ramp_s = 0.5
+
+[[setpoints]]
+t = 17.0
+roll = 1.0
+pitch = -1.0
+
+[[setpoints]]
+t = 19.0
+roll = 0.0
+pitch = 0.0
+altitude_m = 2.0
+ramp_s = 0.75
+
+[[setpoints]]
+t = 30.0
+altitude_m = 1.0
+ramp_s = 0.5
+
+# Never touch the ground or leave the rangefinder's reach while airborne, stay controllable
+[[criteria]]
+metric = "height_min_m"
+min = 0.15
+window = [4, 40]
+
+[[criteria]]
+metric = "height_max_m"
+max = 3.8
+
+[[criteria]]
+metric = "tilt_max_deg"
+max = 40.0
+
+[[criteria]]
+metric = "height_error_final_m"
+max = 0.10
+window = [26, 30]
+
+[[criteria]]
+metric = "height_error_final_m"
+max = 0.10
+window = [35, 40]

@@ -1,0 +1,73 @@
+name = "high_altitude"
+description = "Climb to 20 m (rangefinder reaches 4 m: barometer above), bank at height, lose the barometer for 2 s, come back and land on the rangefinder"
+duration_s = 75
+seed = 12
+
+[wind]
+mean_mps = [1.0, 0.5, 0.0]
+turbulence_sigma_mps = [0.4, 0.4, 0.15]
+turbulence_tau_s = 2.0
+
+[[setpoints]]
+t = 0.0
+altitude_m = 0.0
+
+[[setpoints]]
+t = 2.5
+altitude_m = 2.0
+ramp_s = 2.0
+
+[[setpoints]]
+t = 8.0
+altitude_m = 20.0
+ramp_s = 12.0
+
+[[setpoints]]
+t = 26.0
+roll = -0.6
+pitch = -0.9
+
+[[setpoints]]
+t = 29.0
+roll = 0.0
+pitch = 0.0
+
+[[setpoints]]
+t = 31.0
+roll = 0.5
+
+[[setpoints]]
+t = 33.0
+roll = 0.0
+
+[[setpoints]]
+t = 48.0
+altitude_m = 1.0
+ramp_s = 15.0
+
+[[faults]]
+t = 40.0
+type = "baro_blocked"
+duration_s = 2.0
+
+# Holding 20 m on the barometer alone
+[[criteria]]
+metric = "height_error_final_m"
+max = 0.5
+window = [20, 26]
+
+[[criteria]]
+metric = "est_height_error_max_m"
+estimator = "eskf"
+max = 1.0
+window = [20, 48]
+
+# Back on the rangefinder
+[[criteria]]
+metric = "height_error_final_m"
+max = 0.10
+window = [68, 75]
+
+[[criteria]]
+metric = "tilt_max_deg"
+max = 35.0

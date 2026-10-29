@@ -1,0 +1,59 @@
+name = "attitude_steps"
+description = "At 1.5 m: roll stick 0.5 (15 deg) for 2 s, then pitch -0.5, then both"
+duration_s = 26
+seed = 3
+
+[[setpoints]]
+t = 0.0
+altitude_m = 0.0
+
+[[setpoints]]
+t = 1.0
+altitude_m = 1.5
+
+[[setpoints]]
+t = 8.0
+roll = 0.5
+
+[[setpoints]]
+t = 10.0
+roll = 0.0
+
+[[setpoints]]
+t = 13.0
+pitch = -0.5
+
+[[setpoints]]
+t = 15.0
+pitch = 0.0
+
+[[setpoints]]
+t = 18.0
+roll = -0.4
+pitch = 0.4
+
+[[setpoints]]
+t = 20.0
+roll = 0.0
+pitch = 0.0
+
+[[criteria]]
+metric = "attitude_tracking_rmse_deg"
+max = 3.0
+window = [8, 23]
+
+[[criteria]]
+metric = "est_tilt_error_max_deg"
+estimator = "kf"
+max = 3.0
+window = [5, 26]
+
+[[criteria]]
+metric = "est_tilt_error_max_deg"
+estimator = "eskf"
+max = 3.0
+window = [5, 26]
+
+[[criteria]]
+metric = "tilt_max_deg"
+max = 25.0
