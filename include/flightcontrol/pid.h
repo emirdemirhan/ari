@@ -7,7 +7,7 @@ typedef struct pid {
     float Kp;
     float Ki;
     float Kd;
-    float e_prev;
+    float y_prev;  // Önceki ölçüm (türev ölçüm üzerinden alınır)
     float e_sum;
     float max_i;   // İntegral rüzgarlanma limiti
     float out_min; // Döngüye özel minimum çıkış
@@ -25,7 +25,9 @@ static inline float calculate_pid(pid_coeffs* pid, float r, float y, float ts) {
     // PID hesabı
     float P = pid->Kp * e;
     float I = pid->Ki * pid->e_sum;
-    float D = pid->Kd * (e - pid->e_prev) / ts;
+    // Türev hata yerine ölçüm üzerinden alınır: referans basamak değiştirdiğinde
+    // (ör. 50 Hz dış döngü çıkışı) D terimi sıçrama (derivative kick) üretmez.
+    float D = -pid->Kd * (y - pid->y_prev) / ts;
 
     float u = P + I + D;
 
@@ -33,7 +35,7 @@ static inline float calculate_pid(pid_coeffs* pid, float r, float y, float ts) {
     if (u > pid->out_max) u = pid->out_max;
     else if (u < pid->out_min) u = pid->out_min;
 
-    pid->e_prev = e;
+    pid->y_prev = y;
 
     return u;
 }

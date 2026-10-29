@@ -3,6 +3,7 @@
 
 #include "ari_error.h"
 #include <stdint.h>
+#include <stdbool.h>
 
 
 #define NRF_PAYLOADSIZE 16

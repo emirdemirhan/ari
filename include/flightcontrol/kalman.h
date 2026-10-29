@@ -70,15 +70,6 @@ public:
         R = cov_R;
         P = init_P;
 
-        /* Set P to identity matrix scaled by 0.1f */
-        P.setIdentity();
-        P = P * 0.1f;
-
-        /* Set R matrix to identity matrix scaled by 0.05f */
-        R.setIdentity();
-        R = R * 0.05f;  // Measurement (accelerometer) noise
-
-        
         // Setup the Identity matrix
         I.setIdentity(); 
     }
@@ -114,6 +105,9 @@ public:
 
     /* Helper functions to get state variables */
     float getState(int r, int k){return x(r,k);}
+
+    /* Replace the measurement noise covariance (e.g. to trust a sensor less in some phases) */
+    void setR(const ari_matrix<MeasDim, MeasDim>& cov_R) { R = cov_R; }
     
 };
 

@@ -102,8 +102,8 @@
 
  /**
  * @brief Verifies the hardware connection (SPI Ping Test).
- * * Writes a specific value to a read/write register (RF_CH) and reads it back.
- * If the read value matches the written value, it confirms that SPI wiring is correct.
+ * * Reads the SETUP_AW register, which can only hold 0x01..0x03.
+ * A value in that range confirms that SPI wiring is correct. Does not modify any register.
  * * @return nrfsetup_success  SPI connection is OK.
  * @return nrfsetup_fail Connection failed (Check wiring or power).
  */

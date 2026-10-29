@@ -73,8 +73,8 @@
 
     ce_disable(); // Idle state Low
      
-    /* Wait for chip to stabilize (Power on reset) */
-    delay_us(10);
+    /* Wait for chip to stabilize (Power on reset takes up to 100 ms) */
+    delay_us(100000);
  }
  
  void nrf24_config(uint8_t channel, uint8_t payload_size) {
@@ -115,9 +115,15 @@
      ce_disable();
      
      uint8_t config = nrf_read_reg(NRF_REG_CONFIG);
+     bool was_powered = (config & (1 << 1)) != 0;
      config &= ~(1 << 0); // Clear PRIM_RX bit (Set to TX)
      config |= (1 << 1);  // Set PWR_UP bit
      nrf_write_reg(NRF_REG_CONFIG, config);
+
+     /* Power Down -> Standby-I takes up to 1.5 ms (Tpd2stby) */
+     if (!was_powered) {
+         delay_us(1500);
+     }
  
      /* Flush FIFOs to start fresh */
      cs_select(); spi_transfer(NRF_CMD_FLUSH_TX); cs_deselect();
@@ -129,9 +135,15 @@
      ce_disable();
      
      uint8_t config = nrf_read_reg(NRF_REG_CONFIG);
+     bool was_powered = (config & (1 << 1)) != 0;
      config |= (1 << 0);  // Set PRIM_RX bit (Set to RX)
      config |= (1 << 1);  // Set PWR_UP bit
      nrf_write_reg(NRF_REG_CONFIG, config);
+
+     /* Power Down -> Standby-I takes up to 1.5 ms (Tpd2stby) */
+     if (!was_powered) {
+         delay_us(1500);
+     }
  
      /* Flush FIFOs */
      cs_select(); spi_transfer(NRF_CMD_FLUSH_RX); cs_deselect();
@@ -146,15 +158,11 @@
  }
  
  bool nrf24_data_available(void) {
-     uint8_t status = nrf_read_reg(NRF_REG_STATUS);
-     
-     /* Bit 6 (RX_DR) indicates Data Ready */
-     if (status & (1 << 6)) {
-         /* Clear the interrupt flag by writing 1 to it */
-         nrf_write_reg(NRF_REG_STATUS, (1 << 6));
-         return true;
-     }
-     return false;
+     /* RX_EMPTY (FIFO_STATUS bit 0) is checked instead of RX_DR: RX_DR is only raised
+      * when a packet arrives, so packets already queued in the RX FIFO would be missed. */
+     uint8_t fifo_status = nrf_read_reg(NRF_REG_FIFO_STATUS);
+
+     return (fifo_status & (1 << 0)) == 0;
  }
  
  void nrf24_read(uint8_t *data, uint8_t len) {
@@ -174,18 +182,13 @@
  }
 
  nrf_err_t nrf24_test_connection(void) {
-    uint8_t test_val = 0x35; // Hex 0x35 = Decimal 53 (random number)
-    
-    /* 1. Write it to register */
-    nrf_write_reg(NRF_REG_RF_CH, test_val);
-    
-    /* 2. Read it back */
-    uint8_t read_val = nrf_read_reg(NRF_REG_RF_CH);
-    
-    /* 3. Compare */
-    if (read_val == test_val) {
+    /* Read-only check, so it is safe to call while the radio is in use.
+     * SETUP_AW only ever holds 0x01..0x03; a dead bus reads 0x00 or 0xFF. */
+    uint8_t addr_width = nrf_read_reg(NRF_REG_SETUP_AW);
+
+    if (addr_width >= 0x01 && addr_width <= 0x03) {
         return nrfsetup_success; // Success
     }
-    
+
     return nrfsetup_fail; // Fail
 }

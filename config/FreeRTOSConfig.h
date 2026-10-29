@@ -15,8 +15,12 @@
 /* Hook Fonksiyonları (Hata almamak için kapattık) */
 #define configUSE_IDLE_HOOK             0
 #define configUSE_TICK_HOOK             0
-#define configUSE_MALLOC_FAILED_HOOK    0
-#define configCHECK_FOR_STACK_OVERFLOW  0
+#define configUSE_MALLOC_FAILED_HOOK    1   /* src/fault.c: USART1'e "ARI MALLOC FAILED" yazar */
+#define configCHECK_FOR_STACK_OVERFLOW  2   /* src/fault.c: USART1'e "ARI STACK OVERFLOW <görev>" yazar */
+
+/* Assert: USART1'e "ARI ASSERT <dosya>:<satır>" yazar ve durur (src/fault.c) */
+void ari_assert_failed(const char *file, unsigned long line);
+#define configASSERT(x) if ((x) == 0) { taskDISABLE_INTERRUPTS(); ari_assert_failed(__FILE__, __LINE__); }
 
 /* Fonksiyonları Aç */
 #define INCLUDE_vTaskPrioritySet        1

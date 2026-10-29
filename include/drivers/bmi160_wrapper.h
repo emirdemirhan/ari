@@ -28,7 +28,7 @@ static inline void bmi160_cs_high(void) {
 // Send and Receive 1 Byte via SPI
 static inline uint8_t bmi160_spi_xfer(uint8_t data) {
     spi_send(BMI_SPI, data);
-    while ((SPI_SR(SPI2) & SPI_SR_RXNE) == 0);
+    while ((SPI_SR(BMI_SPI) & SPI_SR_RXNE) == 0);
     uint8_t valret = spi_read(BMI_SPI); 
     return valret;
 }

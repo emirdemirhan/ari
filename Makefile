@@ -42,7 +42,9 @@ SZ = arm-none-eabi-size
 
 # Ortak Ayarlar (İşlemci, FPU, Debug)
 ARCH_FLAGS = -mthumb -mcpu=cortex-m4 -mfloat-abi=hard -mfpu=fpv4-sp-d16
-COMMON_FLAGS = $(ARCH_FLAGS) -Og -g -Wall -Wextra -fno-common -DSTM32F4
+# -O2: PIL ölçümünde kontrol adımı -Og ile ortalama 403 us / en fazla 849 us sürdü (2 ms bütçe).
+# Adım adım hata ayıklamak için geçici olarak -Og kullanılabilir.
+COMMON_FLAGS = $(ARCH_FLAGS) -O2 -g -Wall -Wextra -fno-common -DSTM32F4 -MMD -MP
 
 # Include Yolları
 INCLUDES = -Iinclude \
@@ -57,6 +59,16 @@ INCLUDES = -Iinclude \
            -I$(OPENCM3_DIR)/include
 
 
+
+# HIL hattı seçenekleri (bayrak değişince farklı BUILD_DIR kullanın veya make clean):
+#   make HIL_BAUD=115200        hat hızı (simülatörde --baud ile aynı olmalı)
+#   make HIL_RX_DIAG=1          LED görevi saniyede bir USART1 alım sayaçlarını metin olarak yazar
+ifdef HIL_BAUD
+COMMON_FLAGS += -DHIL_BAUD=$(HIL_BAUD)
+endif
+ifdef HIL_RX_DIAG
+COMMON_FLAGS += -DHIL_RX_DIAG=$(HIL_RX_DIAG)
+endif
 
 # C Bayrakları (Sadece .c dosyaları için)
 CFLAGS = $(COMMON_FLAGS) -std=c99 $(INCLUDES)
@@ -84,7 +96,7 @@ OBJECTS += $(addprefix $(BUILD_DIR)/,$(notdir $(CPP_SOURCES:.cpp=.o)))
 vpath %.c $(sort $(dir $(C_SOURCES)))
 vpath %.cpp $(sort $(dir $(CPP_SOURCES)))
 
-.PHONY: all clean flash
+.PHONY: all clean flash host-test sil
 
 all: $(BUILD_DIR)/$(PROJECT).bin
 
@@ -115,3 +127,47 @@ clean:
 
 flash: $(BUILD_DIR)/$(PROJECT).bin
 	dfu-util -a 0 -s 0x08000000:leave -D $(BUILD_DIR)/$(PROJECT).bin
+
+# Host testi: Kalman ve EKF kestirimcilerini PC'de derleyip gerçek değerle karşılaştırır
+HOST_CXX = g++
+HOST_TEST = $(BUILD_DIR)/estimator_compare
+
+host-test: | $(BUILD_DIR)
+	$(HOST_CXX) -std=c++17 -O1 -Wall -Iinclude -Iinclude/flightcontrol -Iinclude/ari_math \
+		tests/estimator_compare.cpp src/flightcontrol/stest_wrapper.cpp -o $(HOST_TEST)
+	$(HOST_TEST)
+
+# Header bağımlılıkları (-MMD -MP ile üretilen .d dosyaları):
+# bir .h değişince onu include eden kaynaklar yeniden derlenir.
+# SIL kütüphanesi: kontrol adımı (controller.c), kestirimciler ve HIL protokolü PC için
+# derlenir; simülatör (sim/) bunu ctypes ile yükler. Firmware ile aynı kaynaklar.
+HOST_CC = gcc
+SIL_DIR = $(BUILD_DIR)/sil
+SIL_LIB = $(SIL_DIR)/libari_sil.so
+SIL_C_SOURCES = sil/sil_lib.c src/flightcontrol/controller.c src/simulation/hil_protocol.c
+SIL_CPP_SOURCES = src/flightcontrol/stest_wrapper.cpp
+SIL_OBJECTS = $(addprefix $(SIL_DIR)/,$(notdir $(SIL_C_SOURCES:.c=.o) $(SIL_CPP_SOURCES:.cpp=.o)))
+SIL_FLAGS = -O2 -g -fPIC -Wall -Wextra -MMD -MP -Iinclude -Iinclude/flightcontrol -Iinclude/ari_math -Iinclude/simulation
+
+sil: $(SIL_LIB)
+
+$(SIL_LIB): $(SIL_OBJECTS)
+	$(HOST_CXX) -shared $(SIL_OBJECTS) -o $@
+
+$(SIL_DIR)/%.o: sil/%.c | $(SIL_DIR)
+	$(HOST_CC) -c $(SIL_FLAGS) -std=c99 $< -o $@
+
+$(SIL_DIR)/%.o: src/flightcontrol/%.c | $(SIL_DIR)
+	$(HOST_CC) -c $(SIL_FLAGS) -std=c99 $< -o $@
+
+$(SIL_DIR)/%.o: src/simulation/%.c | $(SIL_DIR)
+	$(HOST_CC) -c $(SIL_FLAGS) -std=c99 $< -o $@
+
+$(SIL_DIR)/%.o: src/flightcontrol/%.cpp | $(SIL_DIR)
+	$(HOST_CXX) -c $(SIL_FLAGS) -std=c++17 -fno-rtti -fno-exceptions $< -o $@
+
+$(SIL_DIR):
+	mkdir -p $@
+
+-include $(OBJECTS:.o=.d)
+-include $(SIL_OBJECTS:.o=.d)

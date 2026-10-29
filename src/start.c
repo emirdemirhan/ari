@@ -26,13 +26,15 @@ devicesetup_err_t setup_device(void)
     BMI160_Config sensor_conf = {
         .acc_range = BMI160_ACCEL_RANGE_16G, // Drone titrer, yüksek range iyidir
         .gyr_range = BMI160_GYRO_RANGE_2000, // Hızlı dönüşler için 2000dps
-        .acc_odr   = BMI160_ODR_200HZ,       // 800Hz Output Data Rate
-        .gyr_odr   = BMI160_ODR_200HZ        // Donanımsal Filtre (DLPF) burada aktif
+        .acc_odr   = BMI160_ODR_800HZ,       // 800Hz Output Data Rate
+        .gyr_odr   = BMI160_ODR_800HZ        // Donanımsal Filtre (DLPF) burada aktif
     };
 
     /* BMI160 init */
-    err = bmi160_init(&sensor_conf);
-    
+    if (!bmi160_init(&sensor_conf))
+    {
+        return devicesetup_fail;
+    }
 
     return devicesetup_success;
 }

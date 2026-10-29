@@ -7,9 +7,10 @@
 #include "ari_error.h"
 #include "communication/communication.h"
 #include "drivers/bmi160.h"
-#include "flightcontrol/stest_wrapper.h"
+#include "flightcontrol/controller.h"
 #include "simulation/hil_bridge.h"
-#include "flightcontrol/pid.h"
+#include <libopencm3/cm3/dwt.h>
+#include <libopencm3/stm32/iwdg.h>
 
 
 /* Task Handles */
@@ -20,10 +21,21 @@ TaskHandle_t control_task_handle = NULL;
 static void task_blink(void *args) {
     (void)args;
     
+    // Watchdog'u besler (100 ms'de bir, IWDG süresi 500 ms) ve LED'i 1 Hz yakıp söndürür. Kontrol
+    // görevi aynı öncelikte meşgul beklese de zaman dilimleme sayesinde bu görev çalışır.
+    // Her uyanış kontrol görevinin USART okumasını birkaç us keser; 2 Mbps'te bir bayt 5 us
+    // olduğundan bu bazen taşmaya (ORE) yol açar, bu yüzden gereğinden sık uyanmaz.
+    uint32_t n = 0;
     while (1) {
-        gpio_toggle(LED_PORT, LED_PIN);
-        
-        vTaskDelay(pdMS_TO_TICKS(1000)); 
+        iwdg_reset();
+        if (++n % 10 == 0) {
+            gpio_toggle(LED_PORT, LED_PIN);
+#if HIL_RX_DIAG
+            hil_print_rx_stats();
+#endif
+        }
+
+        vTaskDelay(pdMS_TO_TICKS(100));
     }
 }
 
@@ -62,128 +74,35 @@ static void task_comm(void *args) {
 }
 
 
+/* HIL lock-step: 1 ise kontrol döngüsü TIM3 yerine simülasyon paketleriyle ilerler
+   (her paket bir 2 ms adımdır, simülatör saati yönetir). 0 ise eski davranış:
+   önce TIM3 tikini bekler, sonra paketi okur; o sırada gelen baytlar kaybolabilir. */
+#define HIL_LOCKSTEP 1
+
 /* FreeRTOS task: Control Task */
 static void task_control(void *args) {
     (void)args;
-    
-    
-
-    uint8_t loop_tick = 0;
-
-    // Get reference values from communication task
-    //cmd reference_cmd;
-    //get_cmd(&reference_cmd);
-
-    // Get_current_state();  <-- bu tarz bişey gelcek state estimation
-    // Sonra reference ile aradaki farka PID uygulaması yapıcaz
-    // Ama cascade PID lazım robustness arıyoruz
-    // Konum kontrolü yapmaya çalışıyoruz hız ile cascade yapıcaz o yüzden önce iç döngü yani hız
-    // Şimdi roll pitch birlikte olması lazım ama önce kalman kısmını yazalım sonra bu döngüyü kuralım
-    
-    // Kalman filtresini deneyelim. Simülasyondan veri çekip uyguluyoruz.
-
-    // init pid coeffs
-
-    pid_coeffs v_pos;
-    pid_coeffs v_spd;
-
-    v_pos.Kp = 1.0f;   // 1m hata = 1 m/s hız isteği (Çok daha sakin!)
-    v_pos.Ki = 0.0f;   // Dış döngüde I genelde kullanılmaz (İç döngü halleder)
-    v_pos.Kd = 0.0f;
-    v_pos.e_prev = 0.0f;
-    v_pos.e_sum = 0.0f;
-    v_pos.max_i = 1.0f;
-    v_pos.out_max = 2.0f;  // Maksimum 2 m/s hızla tırmanabilir
-    v_pos.out_min = -1.5f; // Maksimum 1.5 m/s hızla alçalabilir (Negatif olabilir!)
-
-    // --- İÇ DÖNGÜ (Hız -> Düzeltme PWM'i) ---
-    v_spd.Kp = 5.0f;  // 1 m/s hız hatasında motora %15 ekstra güç ver
-    v_spd.Ki = 1.5f;
-    v_spd.Kd = 0.1f;   // Damping için ufak bir D eklendi
-    v_spd.e_prev = 0.0f;
-    v_spd.e_sum = 0.0f;
-    v_spd.max_i = 10.0f; // İç integral limiti
-    v_spd.out_max = 20.0f;  // Hover üstüne maksimum %+40 düzeltme
-    v_spd.out_min = -20.0f; // Hover altından maksimum %-40 kısma
 
     HIL_Sim_Data_t sim_data;
+    HIL_Fc_Data_t fc_data;
 
-    float heigth = 0, v_speed = 0, target_v = 0, target_u = 0;    
-    while (1) 
+    controller_init();
+
+    while (1)
     {
-        if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) > 0)
-        {
-        
-            hil_receive_full_packet(&sim_data);
+#if !HIL_LOCKSTEP
+        if (ulTaskNotifyTake(pdTRUE, portMAX_DELAY) == 0) continue;
+#endif
+        if (hil_receive_full_packet(&sim_data) == 0) continue;
 
-            //hil_receive(sim_data);
-            
-            /*
-            float roll, pitch, yaw;
+        // Kontrol adımının süresini CPU çevrimi olarak ölç (DWT, delay_init ile açıldı)
+        uint32_t start = DWT_CYCCNT;
+        controller_step(&sim_data, &fc_data);
+        fc_data.exec_cycles = DWT_CYCCNT - start;
 
-            // --- ADIM C: Filtreye Gönder ---
-            // Gyro verisiyle TAHMİN (Predict) yap (1kHz döngüde burası çalışmalı)
-            kalman_predict(sim_data[0], sim_data[1], sim_data[2]); // dt = 0.001s (1kHz varsayım)
-
-            // İvmeölçer verisiyle DÜZELTME (Update) yap
-            kalman_update(sim_data[3], sim_data[4], sim_data[5]);
-            
-            // --- ADIM D: Açıyı Al ---
-            
-            kalman_getangles(&roll, &pitch, &yaw);
-
-            // İlk adım olarak yükseklik kontrolü deneyeceğiz  
-
-            // Kontrol işareti üretimi
-            pid_coeffs K_angle, K_angle_rate;
-
-            calculate_pid(&K_angle, sim_data[6], sim_data[7], Ts); 
-
-            */
-
-            // Denemek için sadece altitude
-
-
-            // Predict (500hz)
-            kalman_predict_altitude(0,0,sim_data.accel[2]); // accel Z ekseninden ivme, yerçekimi etkisi çıkarıldı
-
-            if (loop_tick >= 10)
-            {
-                // Update (50hz)
-                kalman_update_altitude(sim_data.altitude_z);
-                kalman_getaltitude(&heigth, &v_speed);
-                // Calculate outer loop
-                target_v = calculate_pid(&v_pos, 5.0f, heigth, 0.02);
-                loop_tick = 0;
-                
-                
-            }
-            
-            kalman_getaltitude(&heigth, &v_speed);
-
-            // Calculate inner loop
-            float pid_correction = calculate_pid(&v_spd, target_v, v_speed, 0.002f);
-
-            // Helikopterini havada sabit tuttuğunu varsaydığımız temel güç (Bunu simülasyonda deneyerek bulmalısın, örn: %55)
-            float HOVER_BASE = 50.0f; 
-
-            // Gerçek motor komutu = Askı Gücü + PID Düzeltmesi
-            target_u = HOVER_BASE + pid_correction;
-
-            // Motorlara %0'dan az, %100'den fazla güç gitmesini engelle (Fiziksel Kırpma)
-            if (target_u > 100.0f) target_u = 100.0f;
-            if (target_u < 5.0f) target_u = 5.0f;
-
-            hil_send_motor_cmds(target_u, heigth);
-
-            loop_tick++;
-
-        
-        }
+        hil_send_fc_data(&fc_data);
     }
-    
 }
-
 
 void communication_task_start(void)
 {
